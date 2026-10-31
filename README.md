@@ -1,554 +1,201 @@
-<div align="center">
+# BRIGHTLOOP – Subscription Management Platform
+## Phase 1: Foundation Setup (Member 1)
 
-# 🚀 BrightLoop
-### Subscription Management & Billing Platform
+**Brightloop** is a unified SaaS subscription platform designed to automate recurring billing, quotation workflows, subscription lifecycles, and financial reporting.
 
-*A modern SaaS subscription management system that automates the complete lifecycle of subscription businesses—from product creation to billing, payments, and revenue analytics.*
-
-![Hackathon](https://img.shields.io/badge/Hackathon-Project-blue?style=for-the-badge)
-![React](https://img.shields.io/badge/Frontend-React%20JSX-61DAFB?style=for-the-badge&logo=react)
-![Supabase](https://img.shields.io/badge/Database-Supabase-3FCF8E?style=for-the-badge&logo=supabase)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-
-</div>
+This repository contains the **Member 1 Foundation Setup**, establishing:
+- Supabase PostgreSQL Database with Row Level Security (RLS)
+- Supabase Auth Integration
+- Role-Based Access Control (RBAC): `ADMIN`, `STAFF`, `CUSTOMER`
+- Express Node.js Backend API with JWT Token Verification Middleware
+- React + Vite Single-Page Application (plain CSS, enterprise SaaS design)
 
 ---
 
-# Project Overview
+## 1. Technology Stack
 
-BrightLoop is a **Subscription Management & Billing Platform** built for businesses that operate on recurring subscriptions.
+- **Frontend**: React 18, Vite, JavaScript (JSX)
+- **Styling**: Plain CSS (Custom Design System, `#1B3C53` Navy & `#F9F3EF` Sand)
+- **Routing**: React Router DOM (v6)
+- **Icons**: Lucide React
+- **Backend**: Node.js, Express, CORS, Dotenv
+- **Database**: Supabase PostgreSQL
+- **Authentication**: Supabase Auth
+- **SDK**: `@supabase/supabase-js`
 
-Instead of manually tracking subscriptions in spreadsheets, generating invoices one by one, and matching payments manually, BrightLoop automates the complete subscription lifecycle.
-
-The platform enables businesses to:
-
-- Manage subscription products and plans
-- Create quotations
-- Convert quotations into subscriptions
-- Generate invoices automatically
-- Track payments
-- Manage taxes and discounts
-- View real-time revenue analytics
-- Allow customers to manage their own subscriptions
-
----
-
-# Problem Statement
-
-Many subscription-based businesses still rely on manual processes for managing subscriptions.
-
-Common problems include:
-
-- Missed renewals
-- Incorrect invoices
-- Duplicate billing
-- Manual payment tracking
-- No visibility into recurring revenue
-- Time-consuming reporting
-
-These issues lead to revenue loss and poor operational efficiency.
+> **Restrictions Enforced**:
+> - Plain CSS only (No Tailwind, No MUI, No CSS frameworks).
+> - Pure JavaScript JSX (No TypeScript).
+> - Modular, decoupled architecture for seamless multi-developer team collaboration.
 
 ---
 
-# Our Solution
-
-BrightLoop provides a centralized platform that automates subscription billing while giving administrators, staff, and customers role-specific dashboards.
-
-The system manages the entire lifecycle:
+## 2. Project Architecture & Folder Structure
 
 ```
-Product
-    ↓
-Plan
-    ↓
-Quotation
-    ↓
-Subscription
-    ↓
-Invoice
-    ↓
-Payment
-    ↓
-Revenue Dashboard
-```
-
----
-
-# Key Features
-
-## Authentication & Role Management
-
-- User Registration
-- Secure Login
-- Forgot Password
-- Role Based Access Control
-- Admin
-- Staff
-- Customer Portal
-
----
-
-## Product Management
-
-- Create Products
-- Product Variants
-- Dynamic Pricing
-- Product Notes
-- Product Types
-- Product Search
-
----
-
-## Subscription Plans
-
-- Daily Billing
-- Weekly Billing
-- Monthly Billing
-- Yearly Billing
-- Minimum Quantity
-- Plan Availability
-- Pause Subscription
-- Resume Subscription
-- Auto Close
-- Renewal
-
----
-
-## Customer Management
-
-- Customer Profiles
-- Customer Search
-- Customer History
-- Customer Subscriptions
-- Customer Invoices
-
----
-
-## Quotation System
-
-- Quotation Templates
-- Validity Period
-- Product Lines
-- Taxes
-- Totals
-- Convert to Subscription
-
----
-
-## Subscription Management
-
-Subscription Lifecycle
-
-```
-Draft
-   ↓
-Quotation
-   ↓
-Confirmed
-   ↓
-Active
-   ↓
-Closed
-```
-
-Features
-
-- Renew
-- Pause
-- Resume
-- Cancel
-- Early Closure
-
----
-
-## Invoice Management
-
-- Automatic Invoice Generation
-- Invoice Status
-- PDF Download
-- Print Invoice
-- Email Invoice
-- Automatic Tax Calculation
-- Duplicate Billing Prevention
-
-Invoice Lifecycle
-
-```
-Draft
-   ↓
-Confirmed
-   ↓
-Paid
-```
-
----
-
-## Payment Management
-
-- Record Payments
-- Multiple Payment Methods
-- Payment Notes
-- Outstanding Balance
-- Payment History
-- Invoice Mapping
-
----
-
-## Tax & Discount Engine
-
-Taxes
-
-- Create Tax Rules
-- Product-wise Taxes
-- Automatic Tax Calculation
-
-Discounts
-
-- Fixed Discounts
-- Percentage Discounts
-- Validity
-- Usage Limits
-- Automatic Discount Application
-
----
-
-## Dashboard & Reports
-
-Finance Dashboard
-
-- Active Subscriptions
-- Revenue
-- Outstanding Payments
-- Overdue Invoices
-- Payments Received
-- Revenue Charts
-- Subscription Analytics
-
----
-
-## Customer Portal
-
-Customers can
-
-- View Subscriptions
-- View Invoices
-- Download PDFs
-- Payment History
-- Update Profile
-- Renewal Request
-- Cancellation Request
-
----
-
-# User Roles
-
-| Role | Permissions |
-|-------|-------------|
-| Admin | Full System Access |
-| Staff | Customer, Subscription & Billing Operations |
-| Customer | View Own Subscriptions & Invoices |
-
----
-
-# Tech Stack
-
-## Frontend
-
-- React JSX
-- React Router
-- CSS
-- Axios
-
-## Backend
-
-- Supabase
-- Supabase Auth
-- Edge Functions (if required)
-
-## Database
-
-- PostgreSQL (Supabase)
-
-## Authentication
-
-- Supabase Authentication
-
-## Deployment
-
-- Vercel *(Frontend)*
-- Supabase *(Backend & Database)*
-
----
-
-# System Architecture
-
-```text
-                ┌──────────────┐
-                │   React App  │
-                └──────┬───────┘
-                       │
-             REST / Supabase APIs
-                       │
-        ┌──────────────┴──────────────┐
-        │                             │
- Authentication                Business Logic
-        │                             │
-        └──────────────┬──────────────┘
-                       │
-                Supabase Database
-                       │
-      Products → Plans → Subscriptions
-                       │
-          Invoices → Payments → Reports
-```
-
----
-
-# Project Structure
-
-```
-BrightLoop/
-
+brightloop/
 │
-├── client/
+├── frontend/                     # React + Vite Client
+│   ├── src/
+│   │   ├── assets/               # Branding assets & SVG icons
+│   │   ├── components/
+│   │   │   ├── common/           # Button, LoadingSpinner, Alert, Toast, SetupBanner
+│   │   │   └── forms/            # InputField, PasswordField (with strength checklist)
+│   │   ├── layouts/
+│   │   │   ├── AdminLayout.jsx   # Admin console layout with role badge & navigation
+│   │   │   ├── StaffLayout.jsx   # Staff operations workspace layout
+│   │   │   └── CustomerLayout.jsx# Customer portal layout
+│   │   ├── pages/
+│   │   │   ├── auth/             # Login, Register, ForgotPassword, ResetPassword
+│   │   │   ├── admin/            # Admin Dashboard with Staff creation & RBAC monitor
+│   │   │   ├── staff/            # Staff Operations Dashboard
+│   │   │   └── customer/         # Customer Subscription Portal
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx   # Central auth state & Supabase Auth listener
+│   │   ├── hooks/
+│   │   │   └── useAuth.js        # AuthContext hook
+│   │   ├── services/
+│   │   │   └── supabase.js       # Reusable Supabase client
+│   │   ├── routes/
+│   │   │   ├── AppRoutes.jsx     # Route declarations
+│   │   │   └── ProtectedRoute.jsx# Role-based route guard
+│   │   ├── styles/
+│   │   │   └── global.css        # Plain CSS design tokens & SaaS components
+│   │   ├── App.jsx               # Application root
+│   │   └── main.jsx              # React DOM entry
+│   ├── index.html
+│   ├── vite.config.js
+│   ├── .env.example
+│   └── package.json
 │
-│   ├── components/
-│   ├── layouts/
-│   ├── pages/
-│   │
-│   ├── authentication/
-│   ├── products/
-│   ├── plans/
-│   ├── customers/
-│   ├── quotations/
-│   ├── subscriptions/
-│   ├── invoices/
-│   ├── payments/
-│   ├── reports/
-│   └── customerPortal/
-│
-├── supabase/
+├── backend/                      # Node.js + Express API
+│   ├── src/
+│   │   ├── config/
+│   │   │   └── supabase.js       # Server-side Supabase client (Service Role Key)
+│   │   ├── middleware/
+│   │   │   ├── auth.js           # Bearer token verification with Supabase Auth
+│   │   │   ├── roles.js          # Role authorization guard (requireRole)
+│   │   │   └── errorHandler.js   # Centralized error handler
+│   │   ├── routes/
+│   │   │   ├── healthRoutes.js   # GET /api/health
+│   │   │   └── authRoutes.js     # GET /api/auth/me, POST /api/users/staff, GET /api/users
+│   │   ├── controllers/
+│   │   │   └── authController.js # Auth and user management business logic
+│   │   ├── app.js                # Express app configuration & middleware
+│   │   └── server.js             # HTTP server entrypoint
+│   ├── .env.example
+│   └── package.json
 │
 ├── database/
+│   └── schema.sql                # Complete SQL schema, RLS policies, triggers & procedures
 │
-├── assets/
+├── docs/
+│   ├── DATABASE_SCHEMA.md        # Comprehensive DB architecture documentation
+│   ├── API_CONTRACTS.md          # REST API contracts & error formats
+│   └── DEVELOPMENT_RULES.md      # Coding conventions & 4-member collaboration rules
 │
+├── .gitignore
 └── README.md
 ```
 
 ---
 
-# Major Modules
+## 3. Database Setup (Supabase)
 
-- Authentication
-- Product Management
-- Subscription Plans
-- Customer Management
-- Quotations
-- Subscription Management
-- Invoice Management
-- Payment Management
-- Tax Management
-- Discount Management
-- Dashboard
-- Reports
-- Customer Portal
+### Step 1: Run the Database Migrations
+1. Open your Supabase project dashboard: [https://supabase.com/dashboard](https://supabase.com/dashboard)
+2. Go to the **SQL Editor** tab from the left sidebar.
+3. Open `database/schema.sql` in this repo, copy its contents, paste them into the SQL Editor, and click **Run**.
+4. This command will:
+   - Create `public.profiles` linked to `auth.users(id)` with RLS enabled.
+   - Attach the `handle_new_user()` trigger to automatically create a profile with the **CUSTOMER** role upon user sign-up.
+   - Enforce database-level rules preventing unauthorized role or status tampering.
+   - Create tables for Member 1's domain: `products`, `product_variants`, `subscription_plans`, `taxes`, and `discounts`.
+
+### Step 2: Create the Initial Administrator Account
+1. In the Brightloop app, register an account (e.g., `admin@brightloop.com`), OR invite the user directly via Supabase Auth dashboard.
+2. Go to the Supabase **SQL Editor** and run:
+   ```sql
+   SELECT public.promote_user_to_admin('admin@brightloop.com');
+   ```
+3. That account now holds the `ADMIN` role with full access to the admin console.
 
 ---
 
-# Workflow
+## 4. Environment Variables Configuration
 
+### Frontend Configuration (`brightloop/frontend/.env`)
+Create `brightloop/frontend/.env` based on `brightloop/frontend/.env.example`:
+```env
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-or-publishable-key
 ```
-Admin
+*(Never place the service role key in frontend/.env!)*
 
-↓
-
-Create Product
-
-↓
-
-Create Plan
-
-↓
-
-Staff
-
-↓
-
-Create Customer
-
-↓
-
-Create Quotation
-
-↓
-
-Customer Accepts
-
-↓
-
-Subscription Created
-
-↓
-
-Billing Date Arrives
-
-↓
-
-Invoice Generated
-
-↓
-
-Payment Recorded
-
-↓
-
-Dashboard Updated
+### Backend Configuration (`brightloop/backend/.env`)
+Create `brightloop/backend/.env` based on `brightloop/backend/.env.example`:
+```env
+PORT=5000
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 ```
 
 ---
 
-# Installation
+## 5. Running the Project Locally
 
-Clone repository
-
+### 5.1. Backend Server
 ```bash
-git clone <repository-link>
-```
-
-Navigate
-
-```bash
-cd BrightLoop
-```
-
-Install dependencies
-
-```bash
+cd brightloop/backend
 npm install
-```
-
-Start development server
-
-```bash
 npm run dev
 ```
+- Server runs on: `http://localhost:5000`
+- Health check: `http://localhost:5000/api/health`
 
----
-
-#  Environment Variables
-
-Create
-
+### 5.2. Frontend Application
+```bash
+cd brightloop/frontend
+npm install
+npm run dev
 ```
-.env
-```
-
-```
-VITE_SUPABASE_URL=YOUR_SUPABASE_URL
-
-VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_KEY
-```
+- Frontend runs on: `http://localhost:3000`
 
 ---
 
-# Screenshots
+## 6. Authentication & Role-Based Access Features
 
-## Dashboard
+| Role | Access URL | Permissions & Capabilities |
+|---|---|---|
+| **ADMIN** | `/admin/dashboard` | Full control: products, variants, subscription plans, taxes, discounts, user directory, and creating internal staff accounts. |
+| **STAFF** | `/staff/dashboard` | Internal operations: view customer directory, handle quotes and subscriptions. Cannot alter taxes/plans or create staff accounts. |
+| **CUSTOMER**| `/portal/dashboard` | Self-service portal: view own subscriptions, invoices, profile. Strict RLS isolation prevents viewing other customers' data. |
 
----
+### Password Security Requirements
+All user passwords must satisfy:
+- Minimum 9 characters (length > 8)
+- At least 1 uppercase letter (`A-Z`)
+- At least 1 lowercase letter (`a-z`)
+- At least 1 special character (`!@#$%^&*...`)
 
-## Products
-
----
-
-## Subscription Management
-
----
-
-## Invoice Generation
-
----
-
-## Customer Portal
+Interactive real-time checklist indicators guide users during registration and password reset.
 
 ---
 
-# Team
+## 7. Protected Backend Endpoints
 
-| Member | Responsibility | Github | LinkedIn |
-|----------|----------------|-----------|----------|
-| **Chris Thomas Abraham** | x | [ChrisToms14](https://github.com/ChrisToms14) | [Chris Thomas Abraham](https://www.linkedin.com/in/christhomasabraham/) |
-| **Niranj R** | x | [Niranj R](https://github.com/niranj-r) | [Niranj R](https://www.linkedin.com/in/niranj-r/) |
-| **Sradhya Renish** | x | [Sradhya9](https://github.com/sradhya9) | [Sradhya Renish](https://www.linkedin.com/in/sradhya-renish/) |
-| **Vedha Mahadevan** | Member 4: Admin Dashboard, Analytics, Reports, Customer Portal & Universal CSV Export | [Vedha17Mahadevan](https://github.com/Vedha17Mahadevan) | [Vedha Mahadevan](https://www.linkedin.com/in/vedha-mahadevan/) |
+All protected endpoints require an `Authorization: Bearer <supabase_jwt>` header:
 
----
-
-# Future Scope
-
-- Payment Gateway Integration
-- Email Notifications
-- Automated Billing Scheduler
-- Revenue Forecasting
-- Multi-Currency Support
-- Multi-Tenant Support
-- Mobile Application
-- Audit Logs
-- API Documentation
+| Method | Endpoint | Allowed Roles | Description |
+|---|---|---|---|
+| `GET` | `/api/health` | Public | Server health & Supabase connectivity check |
+| `GET` | `/api/auth/me` | Any Authenticated | Verifies JWT and returns database profile & role |
+| `POST` | `/api/users/staff` | `ADMIN` only | Provisions internal staff account using Supabase Admin API |
+| `GET` | `/api/users` | `ADMIN` only | Lists all users with optional role & status filter |
+| `PATCH` | `/api/users/:id/status` | `ADMIN` only | Activates/deactivates user accounts |
 
 ---
 
-# Performance Goals
+## 8. Multi-Developer Collaboration (Members 1, 2, 3, 4)
+Please refer to `docs/DEVELOPMENT_RULES.md` and `docs/API_CONTRACTS.md` for guidelines on extending the platform without interfering with Member 1's authentication and product catalogs.
 
-- Response time under **2 seconds**
-- Efficient pagination
-- Optimized database queries
-- Secure authentication
-- Duplicate invoice prevention
-
----
-
-# References
-
-- Supabase Documentation
-- React Documentation
-- PostgreSQL Documentation
-
----
-
-# Demo
-
-Repository
-
-> [Odoo Makeathon](https://github.com/niranj-r/odoo-makeathon/)
-
-Live Demo
-
-> 
-
-Presentation
-
-> 
-
-Demo Video
-
-> 
-
----
-
-# License
-
-This project was developed as part of a Hackathon.
-
-MIT License.
-
----
-
-<div align="center">
-
-### BrightLoop
-
-**Automating Subscription Businesses, One Billing Cycle at a Time.**
-
-</div>
