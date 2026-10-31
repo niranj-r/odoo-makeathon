@@ -56,6 +56,9 @@ export const findSubscriptionsDueForBilling = async (referenceDateInput = new Da
     .or(`next_billing_date.lte.${refDate},next_billing_date.is.null`);
 
   if (error) {
+    if (error.code === 'PGRST205' || error.message?.includes('schema cache')) {
+      return [];
+    }
     throw new Error(`Failed to query due subscriptions: ${error.message}`);
   }
 

@@ -78,7 +78,18 @@ export const listInvoices = async (req, res, next) => {
     query = query.range(offset, offset + limit - 1);
 
     const { data: invoices, count, error } = await query;
-    if (error) throw error;
+    if (error) {
+      if (error.code === 'PGRST205' || error.message?.includes('schema cache')) {
+        return res.json({
+          success: true,
+          data: [],
+          pagination: { total: 0, page, limit, totalPages: 0 },
+          summary: { totalInvoiced: 0, totalCollected: 0, totalOutstanding: 0, overdueCount: 0 },
+          migrationNotice: 'The invoices table has not been created yet in Supabase. Please execute database/combined_member2_and_member3_migration.sql in your Supabase SQL Editor.'
+        });
+      }
+      throw error;
+    }
 
     // Financial Metrics Calculation
     let totalInvoiced = 0;

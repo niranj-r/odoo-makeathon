@@ -208,6 +208,12 @@ export const listPayments = async (params = {}, userRole = 'STAFF', userProfileI
 
   const { data, count, error } = await query;
   if (error) {
+    if (error.code === 'PGRST205' || error.message?.includes('schema cache')) {
+      return {
+        data: [],
+        pagination: { total: 0, page, limit, totalPages: 0 }
+      };
+    }
     throw new Error(`Failed to list payments: ${error.message}`);
   }
 
