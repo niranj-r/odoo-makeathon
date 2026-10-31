@@ -199,3 +199,47 @@ All protected endpoints require an `Authorization: Bearer <supabase_jwt>` header
 ## 8. Multi-Developer Collaboration (Members 1, 2, 3, 4)
 Please refer to `docs/DEVELOPMENT_RULES.md` and `docs/API_CONTRACTS.md` for guidelines on extending the platform without interfering with Member 1's authentication and product catalogs.
 
+
+
+---
+
+## 9. Member 3: Financial Operations Engine (Invoices, Billing & Payments)
+**Owner**: Chris Thomas Abraham ([ChrisToms14](https://github.com/ChrisToms14))
+
+Member 3 builds the complete core financial engine of Brightloop:
+1. **Invoice Generation**: Generates automated recurring invoices from active subscriptions, as well as manual commercial invoices.
+2. **Billing Scheduler**:
+   - Locates subscriptions due for billing on or before any reference date.
+   - Supports daily, weekly, monthly, and yearly billing frequencies.
+   - Enforces strict database-level and application-level duplicate billing prevention.
+3. **Invoice Lifecycle & Actions**:
+   - State machine: `DRAFT` &rarr; `CONFIRMED` &rarr; `PAID` (with `CANCELLED` terminal state).
+   - Actions: Confirm invoice, cancel invoice, send invoice email, print invoice (`@media print`), download invoice PDF.
+4. **Vector PDF Generation**:
+   - Server-side PDF generation using `pdfkit` creating branded A4 vector invoices with line item breakdown, tax details, payment history, and balance due.
+5. **Payment Recording & Allocation Engine**:
+   - Records customer payments with amount, method (`CREDIT_CARD`, `BANK_TRANSFER`, `CASH`, `CHECK`, etc.), date, reference ID, and notes.
+   - Allocates payments against invoice balances, automatically updating `amount_paid`, `outstanding_amount`, `payment_status` (`UNPAID`, `PARTIALLY_PAID`, `PAID`), and `status`.
+   - Prevents overpayments beyond the outstanding balance.
+6. **Email Notifications**:
+   - Responsive HTML templates for `INVOICE_SENT` and `PAYMENT_RECEIPT`.
+   - Complete audit logging in the `email_notifications` table.
+
+### 9.1. Frontend Pages Implemented
+- **Invoice List** (`/staff/invoices`): Financial ledger with summary metric strip, search, lifecycle & payment filters, PDF download, and Billing Scheduler runner.
+- **Invoice Details** (`/staff/invoices/:id`): Complete printable invoice view, itemized table, financial breakdown, transaction history, and instant payment recording modal.
+- **Invoice Builder** (`/staff/invoices/new`): Manual invoice creator with product catalog selector and live calculation of subtotals, taxes, and discounts.
+- **Payment List** (`/staff/payments`): Transaction ledger with method filters, search, and volume statistics.
+- **Record Payment** (`/staff/payments/new`): Dedicated payment allocation form with balance checks and email receipt toggling.
+- **Payment History** (`/staff/payments/history`): Comprehensive audit history with printable receipt modal.
+- **Customer Portal**:
+  - `CustomerInvoices` (`/portal/invoices`): Customer view of invoices with PDF downloads.
+  - `CustomerPayments` (`/portal/payments`): Customer view of payment receipts.
+
+### 9.2. Verification & Testing
+To execute the financial engine test suite:
+```bash
+cd backend
+node verify-financial-engine.js
+```
+62/62 unit and integration tests passing covering calculations, frequency advancement, duplicate billing prevention, state transitions, payment allocations, PDF rendering, email formatting, and RBAC security.

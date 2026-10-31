@@ -5,6 +5,8 @@ import {
   LayoutDashboard,
   CreditCard,
   FileText,
+  RefreshCw,
+  FileSpreadsheet,
   LogOut,
   Building2
 } from 'lucide-react';
@@ -28,7 +30,7 @@ export const CustomerLayout = () => {
 
       {/* Customer Portal Header */}
       <header style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid var(--border-light)' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
               <div className="brand-logo-icon" style={{ width: '32px', height: '32px' }}>
@@ -40,13 +42,37 @@ export const CustomerLayout = () => {
               <span className="badge badge-customer">PORTAL</span>
             </div>
 
-            <nav style={{ display: 'flex', gap: '0.5rem' }}>
+            <nav style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
               <NavLink
                 to="/portal/dashboard"
                 className={({ isActive }) => `btn btn-ghost btn-sm ${isActive ? 'btn-secondary' : ''}`}
               >
                 <LayoutDashboard size={16} />
                 <span>Dashboard</span>
+              </NavLink>
+
+              <NavLink
+                to="/portal/subscriptions"
+                className={({ isActive }) => `btn btn-ghost btn-sm ${isActive ? 'btn-secondary' : ''}`}
+              >
+                <RefreshCw size={16} />
+                <span>My Subscriptions</span>
+              </NavLink>
+
+              <NavLink
+                to="/portal/invoices"
+                className={({ isActive }) => `btn btn-ghost btn-sm ${isActive ? 'btn-secondary' : ''}`}
+              >
+                <FileText size={16} />
+                <span>My Invoices</span>
+              </NavLink>
+
+              <NavLink
+                to="/portal/payments"
+                className={({ isActive }) => `btn btn-ghost btn-sm ${isActive ? 'btn-secondary' : ''}`}
+              >
+                <CreditCard size={16} />
+                <span>Payments</span>
               </NavLink>
             </nav>
           </div>
@@ -85,4 +111,3 @@ export const CustomerLayout = () => {
 };
 
 export default CustomerLayout;
-

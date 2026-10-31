@@ -222,3 +222,83 @@ Executes atomic conversion with row-level locking (`SELECT ... FOR UPDATE`):
    ```sql
    SELECT public.promote_user_to_admin('your-email@example.com');
    ```
+
+
+---
+
+## 4. Member 3 Domain Tables: Invoices, Billing Scheduler & Payment Engine
+
+### 4.1. `invoices` Table
+Stores commercial and automated recurring invoices.
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| `id` | `UUID` | Primary Key, `default uuid_generate_v4()` | Unique invoice identifier |
+| `invoice_number` | `TEXT` | `NOT NULL, UNIQUE` | Formatted `INV-YYYY-XXXX` via sequence `seq_invoice_number` |
+| `subscription_id` | `UUID` | `REFERENCES public.subscriptions(id) ON DELETE SET NULL` | Linked recurring subscription contract |
+| `customer_id` | `UUID` | `NOT NULL, REFERENCES public.customers(id) ON DELETE RESTRICT` | Billed customer account |
+| `invoice_date` | `DATE` | `NOT NULL, DEFAULT CURRENT_DATE` | Date invoice was issued |
+| `due_date` | `DATE` | `NOT NULL` | Payment due date (default: 15 days from issue) |
+| `billing_period_start` | `DATE` | Nullable | Start date of recurring billing coverage |
+| `billing_period_end` | `DATE` | Nullable | End date of recurring billing coverage |
+| `status` | `TEXT` | `CHECK (status IN ('DRAFT', 'CONFIRMED', 'PAID', 'CANCELLED'))` | Invoice lifecycle state |
+| `payment_status` | `TEXT` | `CHECK (payment_status IN ('UNPAID', 'PARTIALLY_PAID', 'PAID'))` | Financial payment balance standing |
+| `subtotal` | `NUMERIC(12,2)` | `CHECK (subtotal >= 0)` | Net line items total before discounts & taxes |
+| `discount_amount` | `NUMERIC(12,2)` | `CHECK (discount_amount >= 0)` | Subtotal deduction |
+| `tax_amount` | `NUMERIC(12,2)` | `CHECK (tax_amount >= 0)` | Aggregate calculated taxes |
+| `grand_total` | `NUMERIC(12,2)` | `CHECK (grand_total >= 0)` | Final payable invoice balance |
+| `amount_paid` | `NUMERIC(12,2)` | `CHECK (amount_paid >= 0)` | Total payments applied so far |
+| `outstanding_amount` | `NUMERIC(12,2)` | `CHECK (outstanding_amount >= 0)` | Remaining unpaid balance |
+| `currency` | `TEXT` | `NOT NULL, DEFAULT 'USD'` | Base operational currency |
+| `payment_terms` | `TEXT` | Default `'Due on receipt'` | Commercial credit payment terms |
+| `sent_at` | `TIMESTAMPTZ` | Nullable | Timestamp when email was dispatched |
+| `paid_at` | `TIMESTAMPTZ` | Nullable | Timestamp when balance reached zero |
+
+#### Duplicate Prevention Guard:
+- `CREATE UNIQUE INDEX idx_invoices_subscription_billing_period_unique ON public.invoices(subscription_id, billing_period_start, billing_period_end) WHERE (status != 'CANCELLED' AND subscription_id IS NOT NULL);`
+- Guarantees database-level enforcement against duplicate billing runs for identical billing periods.
+
+### 4.2. `invoice_lines` Table
+Itemized product and tax lines for an invoice.
+- `id` (UUID, PK)
+- `invoice_id` (UUID, FK -> `invoices.id` ON DELETE CASCADE)
+- `product_id` (UUID, FK -> `products.id` ON DELETE RESTRICT)
+- `product_name_snapshot` (TEXT, NOT NULL)
+- `quantity` (INTEGER, CHECK `quantity >= 1`)
+- `unit_price` (NUMERIC(12,2), CHECK `>= 0`)
+- `tax_id` (UUID, FK -> `taxes.id` ON DELETE SET NULL)
+- `tax_percentage_snapshot` (NUMERIC(5,2), CHECK `>= 0`)
+- `line_subtotal`, `line_tax`, `line_total` (NUMERIC(12,2))
+
+### 4.3. `payments` Table
+Records payment transactions and allocations.
+- `id` (UUID, PK)
+- `payment_number` (TEXT, UNIQUE, default `PAY-YYYY-XXXX` via sequence `seq_payment_number`)
+- `invoice_id` (UUID, FK -> `invoices.id` ON DELETE RESTRICT)
+- `customer_id` (UUID, FK -> `customers.id` ON DELETE RESTRICT)
+- `amount` (NUMERIC(12,2), CHECK `amount > 0`)
+- `payment_method` (TEXT: `'CREDIT_CARD'`, `'BANK_TRANSFER'`, `'CASH'`, `'CHECK'`, `'PAYPAL'`, `'STRIPE'`, `'OTHER'`)
+- `payment_date` (DATE, default `CURRENT_DATE`)
+- `reference_id` (TEXT)
+- `notes` (TEXT)
+- `status` (TEXT: `'COMPLETED'`, `'PENDING'`, `'FAILED'`, `'REFUNDED'`)
+- `recorded_by` (UUID, FK -> `profiles.id`)
+
+### 4.4. `email_notifications` Table
+Stores audit logs and copies of dispatched invoice and payment notifications.
+- `id` (UUID, PK)
+- `recipient_email` (TEXT, NOT NULL)
+- `recipient_name` (TEXT)
+- `subject` (TEXT, NOT NULL)
+- `type` (TEXT: `'INVOICE_SENT'`, `'PAYMENT_RECEIPT'`, `'BILLING_REMINDER'`, `'OVERDUE_ALERT'`)
+- `invoice_id` (UUID, FK -> `invoices.id`)
+- `payment_id` (UUID, FK -> `payments.id`)
+- `body_html` (TEXT, NOT NULL)
+- `status` (TEXT: `'SENT'`, `'FAILED'`, `'QUEUED'`)
+- `sent_at` (TIMESTAMPTZ, default `now()`)
+
+### 4.5. Stored Procedures
+- `public.record_invoice_payment(p_invoice_id, p_amount, p_payment_method, ...)`:
+  Row-locks the invoice (`FOR UPDATE`), validates amount, inserts into `payments`, reallocates balance, updates invoice `amount_paid`, `outstanding_amount`, and statuses (`PAID`/`PARTIALLY_PAID`), and logs email receipt.
+- `public.generate_invoice_from_subscription(p_subscription_id, p_billing_period_start, ...)`:
+  Locks subscription, enforces duplicate check, copies line items, creates invoice in `CONFIRMED` state, advances `next_billing_date` and `last_billed_date`.

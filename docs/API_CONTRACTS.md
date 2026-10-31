@@ -354,3 +354,188 @@ All failure responses follow this consistent structure:
   "error": "Optional technical error details in development"
 }
 ```
+
+
+---
+
+## 5. Member 3 Endpoints: Invoices, Billing & Payment Operations
+
+### 5.1. Invoice Management
+
+#### `GET /api/invoices`
+- **Access**: STAFF, ADMIN, CUSTOMER (scoped to own customer profile)
+- **Query Parameters**:
+  - `page` (default: 1)
+  - `limit` (default: 10, max: 100)
+  - `status` (`DRAFT`, `CONFIRMED`, `PAID`, `CANCELLED`)
+  - `payment_status` (`UNPAID`, `PARTIALLY_PAID`, `PAID`)
+  - `customer_id` (UUID filter)
+  - `subscription_id` (UUID filter)
+  - `search` (invoice number, notes)
+  - `start_date`, `end_date` (ISO date bounds)
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": "i1a2b3c4-...",
+        "invoice_number": "INV-2026-1001",
+        "customer_id": "c1f2e3d4-...",
+        "subscription_id": "s1a2b3c4-...",
+        "invoice_date": "2026-11-01",
+        "due_date": "2026-11-16",
+        "billing_period_start": "2026-11-01",
+        "billing_period_end": "2026-11-30",
+        "status": "CONFIRMED",
+        "payment_status": "UNPAID",
+        "subtotal": 200.00,
+        "discount_amount": 0.00,
+        "tax_amount": 36.00,
+        "grand_total": 236.00,
+        "amount_paid": 0.00,
+        "outstanding_amount": 236.00,
+        "customers": { "name": "Acme Corp", "email": "billing@acme.com" }
+      }
+    ],
+    "pagination": { "total": 12, "page": 1, "limit": 10, "totalPages": 2 },
+    "summary": { "totalInvoiced": 2832.00, "totalCollected": 1200.00, "totalOutstanding": 1632.00, "overdueCount": 2 }
+  }
+  ```
+
+#### `GET /api/invoices/:id`
+- **Access**: STAFF, ADMIN, CUSTOMER (own invoice)
+- **Description**: Returns detailed invoice with lines, payments, customer, and subscription.
+
+#### `POST /api/invoices`
+- **Access**: STAFF, ADMIN
+- **Description**: Creates a manual commercial invoice in `DRAFT` state with itemized lines.
+
+#### `POST /api/invoices/generate-from-subscription/:subscriptionId`
+- **Access**: STAFF, ADMIN
+- **Description**: Generates an invoice for an active subscription for its current billing cycle.
+- **Duplicate Prevention**: Rejects duplicate billing with `409 Conflict` if an active invoice already exists for the cycle.
+
+#### `POST /api/invoices/:id/confirm`
+- **Access**: STAFF, ADMIN
+- **Description**: Transitions invoice status from `DRAFT` to `CONFIRMED`.
+
+#### `POST /api/invoices/:id/cancel`
+- **Access**: STAFF, ADMIN
+- **Description**: Cancels invoice. Rejects with `400 Bad Request` if payments have already been collected.
+
+#### `POST /api/invoices/:id/send`
+- **Access**: STAFF, ADMIN
+- **Description**: Dispatches an invoice notification email to the customer with billing details.
+
+#### `GET /api/invoices/:id/pdf`
+- **Access**: STAFF, ADMIN, CUSTOMER (own invoice)
+- **Description**: Streams a vector-rendered PDF document attachment for download or printing.
+
+---
+
+### 5.2. Billing Scheduler & Automated Engine
+
+#### `POST /api/admin/billing/run-scheduler`
+- **Access**: STAFF, ADMIN
+- **Description**: Triggers automated recurring billing sweep across all active subscriptions due for billing.
+- **Request Body (Optional)**:
+  ```json
+  {
+    "referenceDate": "2026-11-01"
+  }
+  ```
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Automated billing scheduler run completed.",
+    "data": {
+      "runDate": "2026-11-01",
+      "totalDue": 5,
+      "generatedCount": 4,
+      "skippedDuplicateCount": 1,
+      "errorCount": 0,
+      "generatedInvoices": [ ... ]
+    }
+  }
+  ```
+
+#### `GET /api/admin/billing/due-subscriptions`
+- **Access**: STAFF, ADMIN
+- **Description**: Previews subscriptions currently due for billing on or before the reference date without generating yet.
+
+#### `GET /api/admin/billing/status`
+- **Access**: STAFF, ADMIN
+- **Description**: Returns background billing worker status, interval, and last execution summary.
+
+#### `POST /api/admin/billing/worker/start` & `POST /api/admin/billing/worker/stop`
+- **Access**: STAFF, ADMIN
+- **Description**: Controls periodic background recurring billing worker.
+
+---
+
+### 5.3. Payment Operations & Allocation Engine
+
+#### `POST /api/payments`
+- **Access**: STAFF, ADMIN
+- **Description**: Records incoming customer payment, validates amount, allocates payment to invoice balance, updates invoice status (`PAID` or `PARTIALLY_PAID`), and sends receipt email.
+- **Request Body**:
+  ```json
+  {
+    "invoice_id": "i1a2b3c4-...",
+    "amount": 236.00,
+    "payment_method": "CREDIT_CARD",
+    "payment_date": "2026-11-02",
+    "reference_id": "TXN-998812",
+    "notes": "Full settlement via Stripe",
+    "send_receipt": true
+  }
+  ```
+- **Success Response (201 Created)**:
+  ```json
+  {
+    "success": true,
+    "message": "Payment recorded successfully.",
+    "data": {
+      "payment": {
+        "id": "p1a2b3c4-...",
+        "payment_number": "PAY-2026-1001",
+        "amount": 236.00,
+        "payment_method": "CREDIT_CARD",
+        "payment_date": "2026-11-02",
+        "status": "COMPLETED"
+      },
+      "invoice": {
+        "id": "i1a2b3c4-...",
+        "invoice_number": "INV-2026-1001",
+        "amount_paid": 236.00,
+        "outstanding_amount": 0.00,
+        "payment_status": "PAID",
+        "status": "PAID"
+      }
+    }
+  }
+  ```
+
+#### `GET /api/payments`
+- **Access**: STAFF, ADMIN, CUSTOMER (own payments)
+- **Query Parameters**: `page`, `limit`, `invoice_id`, `customer_id`, `payment_method`, `search`, `start_date`, `end_date`
+
+#### `GET /api/payments/:id`
+- **Access**: STAFF, ADMIN, CUSTOMER (own payment)
+
+#### `GET /api/payments/invoice/:invoiceId`
+- **Access**: STAFF, ADMIN, CUSTOMER (own invoice)
+- **Description**: Returns transaction history for a specific invoice.
+
+#### `GET /api/payments/customer/:customerId`
+- **Access**: STAFF, ADMIN, CUSTOMER (own customer)
+
+---
+
+### 5.4. Email Notifications & Logs
+
+#### `GET /api/emails`
+- **Access**: STAFF, ADMIN
+- **Description**: Retrieves audit log of sent invoices, payment receipts, and billing reminders.

@@ -7,6 +7,8 @@ import {
   Users,
   Copy,
   RefreshCw,
+  FileText,
+  CreditCard,
   LogOut,
   Building2
 } from 'lucide-react';
@@ -50,7 +52,7 @@ export const StaffLayout = () => {
             </NavLink>
 
             <div style={{ margin: '1rem 0 0.4rem 0.5rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              Operations
+              Commercial Operations
             </div>
 
             <NavLink
@@ -83,6 +85,26 @@ export const StaffLayout = () => {
             >
               <RefreshCw size={18} />
               <span>Subscriptions</span>
+            </NavLink>
+
+            <div style={{ margin: '1rem 0 0.4rem 0.5rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+              Financial Engine
+            </div>
+
+            <NavLink
+              to="/staff/invoices"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <FileText size={18} />
+              <span>Invoices & Billing</span>
+            </NavLink>
+
+            <NavLink
+              to="/staff/payments"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <CreditCard size={18} />
+              <span>Payments</span>
             </NavLink>
           </nav>
 
