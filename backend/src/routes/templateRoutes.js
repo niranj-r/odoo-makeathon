@@ -11,11 +11,11 @@ import {
 
 const router = Router();
 
-// Staff & Admin Quotation Template Operations
-router.post('/quotation-templates', verifyAuth, requireRoles(['ADMIN', 'STAFF']), createTemplate);
-router.get('/quotation-templates', verifyAuth, requireRoles(['ADMIN', 'STAFF']), listTemplates);
-router.get('/quotation-templates/:id', verifyAuth, requireRoles(['ADMIN', 'STAFF']), getTemplate);
-router.put('/quotation-templates/:id', verifyAuth, requireRoles(['ADMIN', 'STAFF']), updateTemplate);
-router.delete('/quotation-templates/:id', verifyAuth, requireRoles(['ADMIN', 'STAFF']), deleteTemplate);
+// Staff & Admin Quotation Template Operations (Supports both mount styles)
+router.post(['/', '/quotation-templates'], verifyAuth, requireRoles(['ADMIN', 'STAFF']), createTemplate);
+router.get(['/', '/quotation-templates'], verifyAuth, requireRoles(['ADMIN', 'STAFF']), listTemplates);
+router.get(['/:id', '/quotation-templates/:id'], verifyAuth, requireRoles(['ADMIN', 'STAFF']), getTemplate);
+router.put(['/:id', '/quotation-templates/:id'], verifyAuth, requireRoles(['ADMIN', 'STAFF']), updateTemplate);
+router.delete(['/:id', '/quotation-templates/:id'], verifyAuth, requireRoles(['ADMIN', 'STAFF']), deleteTemplate);
 
 export default router;

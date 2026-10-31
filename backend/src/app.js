@@ -35,33 +35,36 @@ app.use(express.json());
 
 // API Documentation / Health Root
 app.get('/', (req, res) => {
+  const routesDoc = {
+    health: '/api/health',
+    auth: '/api/auth',
+    products: '/api/products',
+    subscriptionPlans: '/api/subscription-plans',
+    discounts: '/api/discounts',
+    taxes: '/api/taxes',
+    staff: '/api/admin/staff',
+    staffPortal: '/api/staff/portal',
+    customers: '/api/customers',
+    quotationTemplates: '/api/quotation-templates',
+    quotations: '/api/quotations',
+    subscriptions: '/api/subscriptions',
+    adminJobs: '/api/admin/jobs',
+    invoices: '/api/invoices',
+    payments: '/api/payments',
+    billingScheduler: '/api/admin/billing',
+    emails: '/api/emails',
+    dashboard: '/api/dashboard',
+    analytics: '/api/analytics',
+    reports: '/api/reports',
+    portal: '/api/portal'
+  };
+
   res.json({
     name: 'Brightloop Subscription & Financial Management Platform API',
     version: '1.0.0',
     status: 'online',
-    documentation: {
-      health: '/api/health',
-      auth: '/api/auth',
-      products: '/api/products',
-      subscriptionPlans: '/api/subscription-plans',
-      discounts: '/api/discounts',
-      taxes: '/api/taxes',
-      staff: '/api/admin/staff',
-      staffPortal: '/api/staff/portal',
-      customers: '/api/customers',
-      quotationTemplates: '/api/quotation-templates',
-      quotations: '/api/quotations',
-      subscriptions: '/api/subscriptions',
-      adminJobs: '/api/admin/jobs',
-      invoices: '/api/invoices',
-      payments: '/api/payments',
-      billingScheduler: '/api/admin/billing',
-      emails: '/api/emails',
-      dashboard: '/api/dashboard',
-      analytics: '/api/analytics',
-      reports: '/api/reports',
-      portal: '/api/portal'
-    }
+    documentation: routesDoc,
+    endpoints: routesDoc
   });
 });
 
