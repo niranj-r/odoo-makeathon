@@ -4,7 +4,18 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const rawUrl = process.env.SUPABASE_URL || '';
-const supabaseUrl = rawUrl.replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
+
+const getCleanSupabaseUrl = (input) => {
+  if (!input) return '';
+  try {
+    const parsed = new URL(input);
+    return parsed.origin;
+  } catch {
+    return input.replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
+  }
+};
+
+const supabaseUrl = getCleanSupabaseUrl(rawUrl);
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export const isSupabaseConfigured = () => {

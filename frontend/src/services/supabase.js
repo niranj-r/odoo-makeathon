@@ -1,8 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
 
 const rawUrl = import.meta.env.VITE_SUPABASE_URL || '';
-// Strip trailing /rest/v1 or trailing slashes if present
-const supabaseUrl = rawUrl.replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
+
+// Extract strictly the origin (e.g. https://xyz.supabase.co) without /rest/v1 or any subpaths
+const getCleanSupabaseUrl = (input) => {
+  if (!input) return '';
+  try {
+    const parsed = new URL(input);
+    return parsed.origin;
+  } catch {
+    return input.replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
+  }
+};
+
+const supabaseUrl = getCleanSupabaseUrl(rawUrl);
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 export const isSupabaseConfigured = () => {
