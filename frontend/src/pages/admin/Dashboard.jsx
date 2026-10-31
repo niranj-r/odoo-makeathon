@@ -33,6 +33,38 @@ export const AdminDashboard = () => {
   const [usersList, setUsersList] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
 
+  // Live Dashboard Database Metrics State
+  const [stats, setStats] = useState({
+    products: { total: 0, active: 0, variants: 0 },
+    plans: { total: 0, active: 0 },
+    taxes: { total: 0, active: 0 },
+    discounts: { total: 0, active: 0 },
+    staff: { total: 0, usersTotal: 0 }
+  });
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  const fetchDashboardStats = async () => {
+    if (!session?.access_token) return;
+    try {
+      setLoadingStats(true);
+      const res = await fetch('http://localhost:5000/api/dashboard/stats', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.stats) {
+          setStats(json.stats);
+        }
+      }
+    } catch (err) {
+      console.log('Backend dashboard stats unavailable:', err.message);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
+
   const fetchUsers = async () => {
     if (!session?.access_token) return;
     try {
@@ -54,8 +86,14 @@ export const AdminDashboard = () => {
     }
   };
 
+  const refreshAllData = () => {
+    fetchUsers();
+    fetchDashboardStats();
+  };
+
   useEffect(() => {
     fetchUsers();
+    fetchDashboardStats();
   }, [session?.access_token]);
 
   const handleCreateStaff = async (e) => {
@@ -104,7 +142,7 @@ export const AdminDashboard = () => {
       setStaffFullName('');
       setStaffEmail('');
       setStaffPassword('');
-      fetchUsers();
+      refreshAllData();
     } catch (err) {
       setStaffFormMessage({ type: 'error', text: err.message });
     } finally {
@@ -136,42 +174,138 @@ export const AdminDashboard = () => {
         </button>
       </div>
 
-      {/* Stats & Scope Indicators */}
+      {/* Stats & Scope Indicators - Real Database Metrics */}
       <div className="stats-grid">
+        {/* Products & Variants */}
         <div className="stat-card">
           <div className="stat-header">
             <span className="stat-title">Products & Variants</span>
             <Package size={20} color="var(--primary-navy)" />
           </div>
-          <div className="stat-value">Ready</div>
-          <p style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>Member 1: Products database foundation active</p>
+          <div className="stat-value">
+            {loadingStats ? '—' : stats.products.total}
+          </div>
+          <p style={{ marginTop: '0.4rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            {loadingStats
+              ? 'Loading product metrics...'
+              : `${stats.products.active} active · ${stats.products.variants} variants`}
+          </p>
+          <Link
+            to="/admin/products"
+            style={{
+              marginTop: 'auto',
+              paddingTop: '0.65rem',
+              fontSize: '0.825rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              fontWeight: 600,
+              color: 'var(--primary-navy)'
+            }}
+          >
+            Manage Products <ArrowRight size={13} />
+          </Link>
         </div>
 
+        {/* Subscription Plans */}
         <div className="stat-card">
           <div className="stat-header">
             <span className="stat-title">Subscription Plans</span>
             <Layers size={20} color="var(--primary-navy)" />
           </div>
-          <div className="stat-value">Ready</div>
-          <p style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>Member 1: Daily/Weekly/Monthly/Yearly cadences</p>
+          <div className="stat-value">
+            {loadingStats ? '—' : stats.plans.total}
+          </div>
+          <p style={{ marginTop: '0.4rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            {loadingStats
+              ? 'Loading plan cadences...'
+              : `${stats.plans.active} active recurring cadence${stats.plans.active === 1 ? '' : 's'}`}
+          </p>
+          <Link
+            to="/admin/subscription-plans"
+            style={{
+              marginTop: 'auto',
+              paddingTop: '0.65rem',
+              fontSize: '0.825rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              fontWeight: 600,
+              color: 'var(--primary-navy)'
+            }}
+          >
+            Manage Plans <ArrowRight size={13} />
+          </Link>
         </div>
 
+        {/* Taxes & Discounts */}
         <div className="stat-card">
           <div className="stat-header">
             <span className="stat-title">Taxes & Discounts</span>
             <Percent size={20} color="var(--primary-navy)" />
           </div>
-          <div className="stat-value">Ready</div>
-          <p style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>Member 1: Percentage & fixed rule definitions</p>
+          <div className="stat-value">
+            {loadingStats ? '—' : stats.taxes.total + stats.discounts.total}
+          </div>
+          <p style={{ marginTop: '0.4rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            {loadingStats
+              ? 'Loading fiscal definitions...'
+              : `${stats.taxes.active} active taxes · ${stats.discounts.active} active discounts`}
+          </p>
+          <div
+            style={{
+              marginTop: 'auto',
+              paddingTop: '0.65rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.6rem',
+              fontSize: '0.825rem',
+              fontWeight: 600
+            }}
+          >
+            <Link
+              to="/admin/taxes"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', color: 'var(--primary-navy)' }}
+            >
+              Taxes ({stats.taxes.total}) <ArrowRight size={12} />
+            </Link>
+            <span style={{ color: 'var(--border-dark)' }}>•</span>
+            <Link
+              to="/admin/discounts"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', color: 'var(--primary-navy)' }}
+            >
+              Discounts ({stats.discounts.total}) <ArrowRight size={12} />
+            </Link>
+          </div>
         </div>
 
+        {/* Staff Management */}
         <div className="stat-card">
           <div className="stat-header">
             <span className="stat-title">Staff Management</span>
             <Briefcase size={20} color="var(--primary-navy)" />
           </div>
-          <div className="stat-value">Active</div>
-          <Link to="/admin/staff" style={{ marginTop: '0.5rem', fontSize: '0.825rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontWeight: 600 }}>
+          <div className="stat-value">
+            {loadingStats ? '—' : stats.staff.total}
+          </div>
+          <p style={{ marginTop: '0.4rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            {loadingStats
+              ? 'Loading user directory...'
+              : `${stats.staff.usersTotal} total registered accounts`}
+          </p>
+          <Link
+            to="/admin/staff"
+            style={{
+              marginTop: 'auto',
+              paddingTop: '0.65rem',
+              fontSize: '0.825rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              fontWeight: 600,
+              color: 'var(--primary-navy)'
+            }}
+          >
             Manage Staff Directory <ArrowRight size={13} />
           </Link>
         </div>
@@ -251,7 +385,7 @@ export const AdminDashboard = () => {
               <Link to="/admin/users" className="btn btn-outline btn-sm">
                 View All Users
               </Link>
-              <button onClick={fetchUsers} className="btn btn-outline btn-sm">
+              <button onClick={refreshAllData} className="btn btn-outline btn-sm">
                 Refresh
               </button>
             </div>
