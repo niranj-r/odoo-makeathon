@@ -78,3 +78,4 @@ export const getEmailNotificationById = async (req, res, next) => {
     next(err);
   }
 };
+

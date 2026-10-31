@@ -16,3 +16,4 @@ router.get('/', listEmailNotifications);
 router.get('/:id', getEmailNotificationById);
 
 export default router;
+

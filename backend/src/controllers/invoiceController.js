@@ -524,3 +524,4 @@ export const downloadInvoicePdf = async (req, res, next) => {
     next(err);
   }
 };
+

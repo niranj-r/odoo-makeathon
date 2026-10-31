@@ -123,3 +123,4 @@ export const getCustomerPayments = async (req, res, next) => {
     next(err);
   }
 };
+

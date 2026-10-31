@@ -29,3 +29,4 @@ router.get('/invoice/:invoiceId', requireRoles(['ADMIN', 'STAFF', 'CUSTOMER']), 
 router.get('/customer/:customerId', requireRoles(['ADMIN', 'STAFF', 'CUSTOMER']), getCustomerPayments);
 
 export default router;
+

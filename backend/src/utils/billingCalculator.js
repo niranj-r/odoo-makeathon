@@ -266,3 +266,4 @@ export const calculatePaymentAllocation = (grandTotal, currentAmountPaid, newPay
     invoiceStatus
   };
 };
+

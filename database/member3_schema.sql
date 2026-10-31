@@ -550,3 +550,4 @@ CREATE POLICY "Staff and Admins view email notifications"
     TO authenticated
     USING (public.is_staff_or_admin())
     WITH CHECK (public.is_staff_or_admin());
+

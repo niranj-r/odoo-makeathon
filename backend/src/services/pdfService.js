@@ -238,3 +238,4 @@ export const generateInvoicePdfBuffer = (invoice, lines = [], customer = {}, pay
     }
   });
 };
+

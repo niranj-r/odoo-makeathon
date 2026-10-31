@@ -244,3 +244,4 @@ export const sendPaymentReceiptEmail = async (payment, invoice, customer = {}) =
     }
   });
 };
+

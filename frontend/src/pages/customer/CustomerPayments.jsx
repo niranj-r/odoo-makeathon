@@ -108,3 +108,4 @@ export const CustomerPayments = () => {
 };
 
 export default CustomerPayments;
+

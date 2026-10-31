@@ -42,3 +42,4 @@ router.post('/:id/cancel', requireRoles(['ADMIN', 'STAFF']), cancelInvoice);
 router.post('/:id/send', requireRoles(['ADMIN', 'STAFF']), sendInvoiceAction);
 
 export default router;
+
