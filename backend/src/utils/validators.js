@@ -40,3 +40,4 @@ export const parsePagination = (query) => {
   const to = from + limit - 1;
   return { page, limit, from, to };
 };
+
