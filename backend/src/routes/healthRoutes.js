@@ -3,7 +3,7 @@ import { supabaseAdmin, isSupabaseConfigured } from '../config/supabase.js';
 
 const router = Router();
 
-router.get('/health', async (req, res) => {
+router.get(['/', '/health'], async (req, res) => {
   let supabaseConnected = false;
   let dbMessage = 'Supabase unconfigured';
 
@@ -35,4 +35,3 @@ router.get('/health', async (req, res) => {
 });
 
 export default router;
-
