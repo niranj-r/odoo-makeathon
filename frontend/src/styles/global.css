@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ==============================================================================
    BRIGHTLOOP PLATFORM STYLESHEET
    Enterprise Minimal SaaS Design System (Plain CSS)
@@ -51,6 +55,54 @@
   --transition-normal: 0.25s ease;
 }
 
+html.dark {
+  color-scheme: dark;
+  --primary-navy: #60A5FA;
+  --primary-navy-dark: #3B82F6;
+  --primary-navy-light: #93C5FD;
+  --primary-navy-soft: rgba(96, 165, 250, 0.12);
+
+  --bg-sand: #0B0F19;
+  --bg-card: #0F172A;
+  --bg-card-subtle: #1E293B;
+
+  --secondary-sand: #1E293B;
+  --secondary-sand-light: #334155;
+  --secondary-sand-dark: #0F172A;
+
+  --accent-navy: #60A5FA;
+
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --text-inverted: #0B0F19;
+
+  --border-light: #1E293B;
+  --border-focus: #3B82F6;
+
+  --status-active-bg: rgba(16, 185, 129, 0.15);
+  --status-active-text: #34D399;
+  --status-inactive-bg: rgba(244, 63, 94, 0.15);
+  --status-inactive-text: #FB7185;
+  --status-warning-bg: rgba(245, 158, 11, 0.15);
+  --status-warning-text: #FBBF24;
+}
+
+html.dark body {
+  background-color: #0B0F19 !important;
+  color: #F8FAFC !important;
+}
+
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6 {
+  color: #F8FAFC !important;
+}
+
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -93,6 +145,10 @@ h3 { font-size: 1.25rem; }
 h4 { font-size: 1.1rem; }
 p { color: var(--text-secondary); font-size: 0.95rem; }
 small { font-size: 0.8125rem; }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* ==============================================================================
    BUTTONS
@@ -181,6 +237,10 @@ small { font-size: 0.8125rem; }
 .btn-block {
   width: 100%;
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* ==============================================================================
    FORMS & INPUTS
@@ -308,6 +368,10 @@ small { font-size: 0.8125rem; }
   font-weight: 500;
 }
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ==============================================================================
    BADGES & CHIPS
    ============================================================================== */
@@ -348,6 +412,10 @@ small { font-size: 0.8125rem; }
   color: var(--status-inactive-text);
 }
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ==============================================================================
    ALERTS & NOTIFICATIONS
    ============================================================================== */
@@ -384,6 +452,10 @@ small { font-size: 0.8125rem; }
   border: 1px solid #BFDBFE;
   color: #1E40AF;
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* ==============================================================================
    AUTH LAYOUT (Login, Register, Password Reset)
@@ -462,6 +534,10 @@ small { font-size: 0.8125rem; }
   font-size: 0.875rem;
   color: var(--text-secondary);
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* ==============================================================================
    DASHBOARD LAYOUT (Admin, Staff, Customer)
@@ -593,6 +669,10 @@ small { font-size: 0.8125rem; }
   overflow-y: auto;
 }
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ==============================================================================
    DASHBOARD CARDS & STATS
    ============================================================================== */
@@ -672,6 +752,10 @@ small { font-size: 0.8125rem; }
   border-bottom: 1px solid var(--border-light);
 }
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ==============================================================================
    DATA TABLES
    ============================================================================== */
@@ -703,6 +787,10 @@ small { font-size: 0.8125rem; }
 .data-table tr:hover td {
   background-color: #FAF7F4;
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* ==============================================================================
    TOAST NOTIFICATION
@@ -745,6 +833,10 @@ small { font-size: 0.8125rem; }
     opacity: 1;
   }
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* ==============================================================================
    SPINNER
@@ -802,6 +894,10 @@ small { font-size: 0.8125rem; }
   text-decoration: underline;
   font-weight: 700;
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* ==============================================================================
    RESPONSIVE DESIGN

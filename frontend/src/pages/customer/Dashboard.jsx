@@ -1,104 +1,177 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowRight, CreditCard, FileText } from 'lucide-react';
+import { PageHeader } from '../../components/layout/PageHeader';
 import {
-  User,
-  CreditCard,
-  FileText,
-  Calendar,
-  LogOut,
-  ShieldCheck,
-  PackageCheck
-} from 'lucide-react';
+  CustomerKpiGrid,
+  CustomerUsageCards,
+  CustomerSpendingChart,
+  CustomerInvoiceStatusChart,
+  CustomerQuickActions,
+  SubscriptionCardList,
+  SubscriptionDetailModal,
+  InvoiceTable,
+  InvoiceDetailModal,
+  PortalFeedbackToast,
+} from '../../components/portal';
+import { useCustomerPortal } from '../../hooks/useCustomerPortal';
 import { useAuth } from '../../context/AuthContext';
 
+/**
+ * CustomerDashboard Page
+ * Upgraded Customer Self-Service Dashboard with live spending charts, quota usage progress bars,
+ * interactive multi-filter invoice tables, and self-service lifecycle actions.
+ */
 export const CustomerDashboard = () => {
-  const { user, profile, logout } = useAuth();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const {
+    profile,
+    kpis,
+    subscriptions,
+    selectedSubscription,
+    setSelectedSubscription,
+    invoices,
+    selectedInvoice,
+    setSelectedInvoice,
+    usageData,
+    feedback,
+    clearFeedback,
+    renewSubscription,
+    pauseSubscription,
+    cancelSubscription,
+    downloadInvoice,
+    downloadLatestInvoice,
+    contactSupport,
+    isLoading,
+  } = useCustomerPortal();
 
-  const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Customer';
+  const [isSubModalOpen, setIsSubModalOpen] = useState(false);
+  const [isInvModalOpen, setIsInvModalOpen] = useState(false);
+
+  const customerName = profile?.name || user?.email?.split('@')[0] || 'Valued Customer';
+  const primarySubId = subscriptions[0]?.id || null;
+
+  const handleViewSub = (sub) => {
+    setSelectedSubscription(sub);
+    setIsSubModalOpen(true);
+  };
+
+  const handleViewInv = (inv) => {
+    setSelectedInvoice(inv);
+    setIsInvModalOpen(true);
+  };
 
   return (
-    <div>
-      {/* Welcome Banner */}
-      <div className="dashboard-hero" style={{ background: 'linear-gradient(135deg, #1B3C53 0%, #2A5A7B 100%)' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.4rem' }}>
-            <span className="badge badge-customer">
-              <User size={14} /> Customer Portal
-            </span>
-            <span className="badge badge-active">ACTIVE SUBSCRIPTION STANDING</span>
-          </div>
-          <h1>Welcome, {displayName}</h1>
-          <p>
-            Logged in as <strong>{user?.email}</strong> with role <strong>CUSTOMER</strong>. Here you can review your active subscription plans, payment records, and monthly invoices.
-          </p>
+    <div className="space-y-6 pb-12">
+      {/* Toast Alert */}
+      <PortalFeedbackToast feedback={feedback} onClose={clearFeedback} />
+
+      {/* Header */}
+      <PageHeader
+        title={`Welcome back, ${customerName}`}
+        subtitle="Manage your subscriptions, invoices and payments."
+      />
+
+      {/* Section 1: KPI Cards */}
+      <CustomerKpiGrid kpis={kpis} loading={isLoading} />
+
+      {/* Phase 8: Quota & Usage Progress Bars (Seats, API, Storage, Health) */}
+      <CustomerUsageCards usage={usageData?.usageMetrics} loading={isLoading} />
+
+      {/* Phase 8: Charts Grid (Spending Line Chart + Invoices Donut Chart) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2">
+          <CustomerSpendingChart data={usageData?.spendingHistory || []} />
         </div>
-
-        <button onClick={logout} className="btn btn-secondary btn-sm" style={{ alignSelf: 'flex-start' }}>
-          <LogOut size={16} /> Sign Out
-        </button>
-      </div>
-
-      {/* Customer Quick Stats */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-header">
-            <span className="stat-title">Current Plans</span>
-            <PackageCheck size={20} color="var(--primary-navy)" />
-          </div>
-          <div className="stat-value">Active</div>
-          <p style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>Managed through Brightloop Subscription Engine</p>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-header">
-            <span className="stat-title">Billing Status</span>
-            <CreditCard size={20} color="var(--primary-navy)" />
-          </div>
-          <div className="stat-value">Current</div>
-          <p style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>All invoices settled on schedule</p>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-header">
-            <span className="stat-title">Statements</span>
-            <FileText size={20} color="var(--primary-navy)" />
-          </div>
-          <div className="stat-value">Up to date</div>
-          <p style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>Automated monthly statements generated</p>
+        <div className="lg:col-span-1">
+          <CustomerInvoiceStatusChart data={usageData?.invoiceBreakdown || []} />
         </div>
       </div>
 
-      {/* Account Details & Role Isolation Info */}
-      <div className="content-card">
-        <div className="card-title-row">
-          <div>
-            <h3>Your Profile & Security Status</h3>
-            <p style={{ fontSize: '0.825rem' }}>Your account is protected with Row Level Security (RLS).</p>
+      {/* Section 8: Quick Actions */}
+      <CustomerQuickActions
+        primarySubscriptionId={primarySubId}
+        onRenew={renewSubscription}
+        onPause={pauseSubscription}
+        onCancel={cancelSubscription}
+        onDownloadLatestInvoice={downloadLatestInvoice}
+        onContactSupport={contactSupport}
+      />
+
+      {/* Overview Section: Subscriptions Preview */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <CreditCard size={18} className="text-blue-600" />
+            <h3 className="text-base font-semibold text-slate-900 tracking-tight">
+              Active Subscription Plans
+            </h3>
           </div>
-          <ShieldCheck size={20} color="#10B981" />
+          <button
+            type="button"
+            onClick={() => navigate('/customer/subscriptions')}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+          >
+            <span>View All Plans</span>
+            <ArrowRight size={13} />
+          </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem' }}>
-          <div>
-            <small style={{ color: 'var(--text-muted)', display: 'block' }}>FULL NAME</small>
-            <strong style={{ fontSize: '1rem' }}>{displayName}</strong>
-          </div>
-          <div>
-            <small style={{ color: 'var(--text-muted)', display: 'block' }}>REGISTERED EMAIL</small>
-            <strong style={{ fontSize: '1rem' }}>{user?.email}</strong>
-          </div>
-          <div>
-            <small style={{ color: 'var(--text-muted)', display: 'block' }}>USER ROLE</small>
-            <div><span className="badge badge-customer">CUSTOMER</span></div>
-          </div>
-          <div>
-            <small style={{ color: 'var(--text-muted)', display: 'block' }}>DATA ISOLATION</small>
-            <span style={{ color: '#166534', fontWeight: 600 }}>RLS Enforced (Self-only)</span>
-          </div>
-        </div>
+        <SubscriptionCardList
+          subscriptions={subscriptions}
+          onView={handleViewSub}
+          onRenew={renewSubscription}
+          onPause={pauseSubscription}
+          onCancel={cancelSubscription}
+          showFilters={false}
+        />
       </div>
+
+      {/* Overview Section: Recent Invoices Preview */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <FileText size={18} className="text-blue-600" />
+            <h3 className="text-base font-semibold text-slate-900 tracking-tight">
+              Recent Billing Invoices
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/customer/invoices')}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+          >
+            <span>View All Invoices</span>
+            <ArrowRight size={13} />
+          </button>
+        </div>
+
+        <InvoiceTable
+          invoices={invoices}
+          onViewInvoice={handleViewInv}
+          onDownloadInvoice={downloadInvoice}
+        />
+      </div>
+
+      {/* Modals */}
+      <SubscriptionDetailModal
+        subscription={selectedSubscription}
+        isOpen={isSubModalOpen}
+        onClose={() => setIsSubModalOpen(false)}
+        onRenew={renewSubscription}
+        onPause={pauseSubscription}
+        onCancel={cancelSubscription}
+      />
+
+      <InvoiceDetailModal
+        invoice={selectedInvoice}
+        isOpen={isInvModalOpen}
+        onClose={() => setIsInvModalOpen(false)}
+        onDownload={downloadInvoice}
+      />
     </div>
   );
 };
 
 export default CustomerDashboard;
-

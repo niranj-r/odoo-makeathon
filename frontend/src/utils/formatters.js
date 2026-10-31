@@ -42,9 +42,9 @@ export function formatNumber(value) {
  * Standard enterprise date formatting: "Oct 24, 2026"
  */
 export function formatDate(dateString) {
-  if (!dateString) return '—';
+  if (!dateString) return '-';
   const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-  if (isNaN(date.getTime())) return '—';
+  if (isNaN(date.getTime())) return '-';
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
@@ -56,9 +56,9 @@ export function formatDate(dateString) {
  * Date with time formatting: "Oct 24, 2026, 2:30 PM"
  */
 export function formatDateTime(dateString) {
-  if (!dateString) return '—';
+  if (!dateString) return '-';
   const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-  if (isNaN(date.getTime())) return '—';
+  if (isNaN(date.getTime())) return '-';
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
@@ -67,4 +67,3 @@ export function formatDateTime(dateString) {
     minute: 'numeric',
   }).format(date);
 }
-
