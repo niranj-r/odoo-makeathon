@@ -4,7 +4,11 @@ import {
   Briefcase,
   LayoutDashboard,
   FileSpreadsheet,
+  Layers,
   Users,
+  Receipt,
+  CreditCard,
+  UserCheck,
   LogOut,
   Building2
 } from 'lucide-react';
@@ -51,15 +55,57 @@ export const StaffLayout = () => {
               Operations
             </div>
 
-            <div className="nav-item" style={{ opacity: 0.65, cursor: 'default' }} title="Member 2 Module">
+            <NavLink
+              to="/staff/customers"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <Users size={18} />
+              <span>Customers</span>
+            </NavLink>
+
+            <NavLink
+              to="/staff/quotations"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
               <FileSpreadsheet size={18} />
-              <span>Quotes & Subscriptions</span>
+              <span>Quotations</span>
+            </NavLink>
+
+            <NavLink
+              to="/staff/subscriptions"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <Layers size={18} />
+              <span>Subscriptions</span>
+            </NavLink>
+
+            <NavLink
+              to="/staff/invoices"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <Receipt size={18} />
+              <span>Invoices</span>
+            </NavLink>
+
+            <NavLink
+              to="/staff/payments"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <CreditCard size={18} />
+              <span>Payments</span>
+            </NavLink>
+
+            <div style={{ margin: '1rem 0 0.4rem 0.5rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+              Account
             </div>
 
-            <div className="nav-item" style={{ opacity: 0.65, cursor: 'default' }} title="Customer Directory">
-              <Users size={18} />
-              <span>Customers Directory</span>
-            </div>
+            <NavLink
+              to="/staff/profile"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <UserCheck size={18} />
+              <span>My Profile</span>
+            </NavLink>
           </nav>
 
           <div className="sidebar-footer">

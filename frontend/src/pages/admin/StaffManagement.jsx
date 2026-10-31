@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Briefcase,
   Search,
@@ -277,14 +278,10 @@ export const StaffManagement = () => {
             <span>Refresh</span>
           </button>
 
-          <Button
-            variant="primary"
-            size="sm"
-            icon={PlusCircle}
-            onClick={() => setIsAddModalOpen(true)}
-          >
-            Add Staff Member
-          </Button>
+          <Link to="/admin/staff/new" className="btn btn-primary btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+            <PlusCircle size={15} />
+            <span>Invite / Add Staff</span>
+          </Link>
         </div>
       </div>
 
@@ -380,23 +377,25 @@ export const StaffManagement = () => {
                     <td>{formatDate(s.created_at)}</td>
                     <td style={{ textAlign: 'right' }}>
                       <div className="action-btn-group" style={{ justifyContent: 'flex-end' }}>
-                        <button
-                          onClick={() => setViewingStaff(s)}
+                        <Link
+                          to={`/admin/staff/${s.id}`}
                           className="action-btn"
                           title="View Details"
+                          style={{ textDecoration: 'none' }}
                         >
                           <Eye size={14} />
                           <span>View</span>
-                        </button>
+                        </Link>
 
-                        <button
-                          onClick={() => openEditModal(s)}
+                        <Link
+                          to={`/admin/staff/${s.id}/edit`}
                           className="action-btn"
                           title="Edit Details"
+                          style={{ textDecoration: 'none' }}
                         >
                           <Edit2 size={14} />
                           <span>Edit</span>
-                        </button>
+                        </Link>
 
                         <button
                           onClick={() => setConfirmStatusStaff(s)}

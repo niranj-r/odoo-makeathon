@@ -7,6 +7,8 @@ import subscriptionPlanRoutes from './routes/subscriptionPlanRoutes.js';
 import taxRoutes from './routes/taxRoutes.js';
 import discountRoutes from './routes/discountRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
+import adminStaffRoutes from './routes/adminStaffRoutes.js';
+import staffPortalRoutes from './routes/staffPortalRoutes.js';
 import { verifyAuth } from './middleware/auth.js';
 import { requireRoles } from './middleware/roles.js';
 import { listAllVariants } from './controllers/variantController.js';
@@ -51,6 +53,8 @@ app.use('/api/subscription-plans', subscriptionPlanRoutes);
 app.use('/api/taxes', taxRoutes);
 app.use('/api/discounts', discountRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/admin/staff', adminStaffRoutes);
+app.use('/api/staff', staffPortalRoutes);
 app.get('/api/variants', verifyAuth, requireRoles(['ADMIN', 'STAFF']), listAllVariants);
 
 // 404 Handler
