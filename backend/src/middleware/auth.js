@@ -128,3 +128,7 @@ export const verifyAuth = async (req, res, next) => {
     next(err);
   }
 };
+
+// Re-export role authorization helpers for developer convenience
+export { requireRole, requireRoles } from './roles.js';
+

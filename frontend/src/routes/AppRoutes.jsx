@@ -27,6 +27,14 @@ import SubscriptionPlanList from '../pages/admin/SubscriptionPlanList';
 import SubscriptionPlanCreate from '../pages/admin/SubscriptionPlanCreate';
 import SubscriptionPlanDetail from '../pages/admin/SubscriptionPlanDetail';
 import SubscriptionPlanEdit from '../pages/admin/SubscriptionPlanEdit';
+import TaxList from '../pages/admin/TaxList';
+import TaxCreate from '../pages/admin/TaxCreate';
+import TaxDetail from '../pages/admin/TaxDetail';
+import TaxEdit from '../pages/admin/TaxEdit';
+import DiscountList from '../pages/admin/DiscountList';
+import DiscountCreate from '../pages/admin/DiscountCreate';
+import DiscountDetail from '../pages/admin/DiscountDetail';
+import DiscountEdit from '../pages/admin/DiscountEdit';
 import StaffDashboard from '../pages/staff/Dashboard';
 import CustomerDashboard from '../pages/customer/Dashboard';
 
@@ -98,6 +106,14 @@ export const AppRoutes = () => {
         <Route path="subscription-plans/new" element={<SubscriptionPlanCreate />} />
         <Route path="subscription-plans/:id" element={<SubscriptionPlanDetail />} />
         <Route path="subscription-plans/:id/edit" element={<SubscriptionPlanEdit />} />
+        <Route path="taxes" element={<TaxList />} />
+        <Route path="taxes/new" element={<TaxCreate />} />
+        <Route path="taxes/:id" element={<TaxDetail />} />
+        <Route path="taxes/:id/edit" element={<TaxEdit />} />
+        <Route path="discounts" element={<DiscountList />} />
+        <Route path="discounts/new" element={<DiscountCreate />} />
+        <Route path="discounts/:id" element={<DiscountDetail />} />
+        <Route path="discounts/:id/edit" element={<DiscountEdit />} />
       </Route>
 
       {/* Protected Staff Routes */}

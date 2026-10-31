@@ -672,8 +672,8 @@ export const SubscriptionPlanList = () => {
 
       {/* Status Confirmation Modal */}
       {confirmPlan && (
-        <div className="modal-backdrop">
-          <div className="modal-container" style={{ maxWidth: '440px' }}>
+        <div className="modal-overlay" onClick={() => !statusActionLoading && setConfirmPlan(null)}>
+          <div className="modal-box" style={{ maxWidth: '460px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <AlertCircle

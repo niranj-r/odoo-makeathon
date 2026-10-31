@@ -16,6 +16,10 @@ import {
   updateVariantStatus,
   listAllVariants
 } from '../controllers/variantController.js';
+import {
+  getProductTaxes,
+  assignProductTaxes
+} from '../controllers/taxController.js';
 
 const router = Router();
 
@@ -59,6 +63,16 @@ router.put('/:id/variants/:variantId', verifyAuth, requireRole('ADMIN'), updateV
 
 // PATCH /api/products/:id/variants/:variantId/status - Activate / deactivate variant (Admin only)
 router.patch('/:id/variants/:variantId/status', verifyAuth, requireRole('ADMIN'), updateVariantStatus);
+
+// ==============================================================================
+// PRODUCT TAX ENDPOINTS (/api/products/:productId/taxes)
+// ==============================================================================
+
+// GET /api/products/:productId/taxes - View taxes associated with a product (Admin & Staff)
+router.get('/:productId/taxes', verifyAuth, requireRoles(['ADMIN', 'STAFF']), getProductTaxes);
+
+// PUT /api/products/:productId/taxes - Assign / update taxes for a product (Admin only)
+router.put('/:productId/taxes', verifyAuth, requireRole('ADMIN'), assignProductTaxes);
 
 export default router;
 

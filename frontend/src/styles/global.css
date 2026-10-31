@@ -806,7 +806,8 @@ small { font-size: 0.8125rem; }
 /* ==============================================================================
    MODALS & DIALOGS
    ============================================================================== */
-.modal-overlay {
+.modal-overlay,
+.modal-backdrop {
   position: fixed;
   inset: 0;
   background-color: rgba(18, 40, 56, 0.55);
@@ -820,7 +821,8 @@ small { font-size: 0.8125rem; }
   animation: fadeIn 0.15s ease-out;
 }
 
-.modal-box {
+.modal-box,
+.modal-container {
   background-color: #FFFFFF;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);

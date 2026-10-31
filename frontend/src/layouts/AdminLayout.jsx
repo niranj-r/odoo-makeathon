@@ -7,6 +7,7 @@ import {
   Layers,
   CalendarRange,
   Percent,
+  Tag,
   Users,
   LogOut,
   Building2
@@ -90,14 +91,21 @@ export const AdminLayout = () => {
               <span>Subscription Plans</span>
             </NavLink>
 
-            <div style={{ margin: '1rem 0 0.4rem 0.5rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              Future Modules
-            </div>
-
-            <div className="nav-item" style={{ opacity: 0.65, cursor: 'default' }} title="Phase 2 Stage 5 Domain">
+            <NavLink
+              to="/admin/taxes"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
               <Percent size={18} />
-              <span>Taxes & Discounts</span>
-            </div>
+              <span>Taxes & Fiscal</span>
+            </NavLink>
+
+            <NavLink
+              to="/admin/discounts"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <Tag size={18} />
+              <span>Discounts & Promos</span>
+            </NavLink>
           </nav>
 
           <div className="sidebar-footer">

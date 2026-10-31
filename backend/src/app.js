@@ -4,6 +4,8 @@ import healthRoutes from './routes/healthRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import subscriptionPlanRoutes from './routes/subscriptionPlanRoutes.js';
+import taxRoutes from './routes/taxRoutes.js';
+import discountRoutes from './routes/discountRoutes.js';
 import { verifyAuth } from './middleware/auth.js';
 import { requireRoles } from './middleware/roles.js';
 import { listAllVariants } from './controllers/variantController.js';
@@ -33,7 +35,9 @@ app.get('/', (req, res) => {
       staff: '/api/users/staff',
       products: '/api/products',
       variants: '/api/variants',
-      subscriptionPlans: '/api/subscription-plans'
+      subscriptionPlans: '/api/subscription-plans',
+      taxes: '/api/taxes',
+      discounts: '/api/discounts'
     }
   });
 });
@@ -43,6 +47,8 @@ app.use('/api', healthRoutes);
 app.use('/api', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/subscription-plans', subscriptionPlanRoutes);
+app.use('/api/taxes', taxRoutes);
+app.use('/api/discounts', discountRoutes);
 app.get('/api/variants', verifyAuth, requireRoles(['ADMIN', 'STAFF']), listAllVariants);
 
 // 404 Handler

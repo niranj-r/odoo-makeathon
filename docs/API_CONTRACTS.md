@@ -839,7 +839,474 @@ Implemented via backend utility: `calculateVariantPrice(productId, variantId, db
 
 ---
 
-## 7. Standard Error Format
+## 7. Tax Management & Fiscal Calculation API (Phase 4)
+
+### 7.1. List Taxes
+- **Endpoint**: `GET /api/taxes`
+- **Access**: ADMIN, STAFF, and CUSTOMER
+- **Headers**: `Authorization: Bearer <token>`
+- **Query Parameters**:
+  - `page` (optional): Page number (default: 1)
+  - `limit` (optional): Items per page (default: 10, max: 100)
+  - `search` (optional): Tax name substring search
+  - `computation_type` (optional): `percentage` or `fixed`
+  - `status` (optional): `active` or `inactive` (Admins/Staff only; Customers receive active taxes only)
+  - `sortBy` (optional): `name`, `rate_percentage`, `computation_type`, `created_at` (default: `created_at`)
+  - `sortOrder` (optional): `asc` or `desc` (default: `desc`)
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "taxes": [
+      {
+        "id": "e6a7b8c9-...",
+        "name": "GST 18%",
+        "computation_type": "percentage",
+        "rate_percentage": 18.0,
+        "is_active": true,
+        "created_at": "2026-10-31T13:00:00Z",
+        "updated_at": "2026-10-31T13:00:00Z",
+        "display_rate": "18.00%"
+      }
+    ],
+    "pagination": {
+      "total": 3,
+      "page": 1,
+      "limit": 10,
+      "totalPages": 1
+    }
+  }
+  ```
+
+---
+
+### 7.2. Get Tax Details
+- **Endpoint**: `GET /api/taxes/:id`
+- **Access**: ADMIN and STAFF
+- **Headers**: `Authorization: Bearer <token>`
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "tax": {
+      "id": "e6a7b8c9-...",
+      "name": "GST 18%",
+      "computation_type": "percentage",
+      "rate_percentage": 18.0,
+      "is_active": true,
+      "created_at": "2026-10-31T13:00:00Z",
+      "updated_at": "2026-10-31T13:00:00Z",
+      "display_rate": "18.00%",
+      "associated_product_count": 5
+    }
+  }
+  ```
+
+---
+
+### 7.3. Create Tax Record
+- **Endpoint**: `POST /api/taxes`
+- **Access**: ADMIN only
+- **Headers**: `Authorization: Bearer <admin_token>`
+- **Request Body**:
+  ```json
+  {
+    "name": "GST 18%",
+    "computation_type": "percentage",
+    "rate_percentage": 18.0,
+    "is_active": true
+  }
+  ```
+- **Validation**:
+  - `name`: Required string, 1 to 255 characters
+  - `computation_type`: Required, must be either `'percentage'` or `'fixed'`
+  - `rate_percentage`: Required non-negative number $\ge 0$. For `'percentage'`, must be $\le 100$. For `'fixed'`, represents the Indian Rupee amount per item.
+  - `is_active`: Optional boolean (default: `true`)
+- **Success Response (201 Created)**:
+  ```json
+  {
+    "success": true,
+    "message": "Tax \"GST 18%\" created successfully.",
+    "tax": {
+      "id": "e6a7b8c9-...",
+      "name": "GST 18%",
+      "computation_type": "percentage",
+      "rate_percentage": 18.0,
+      "is_active": true,
+      "display_rate": "18.00%"
+    }
+  }
+  ```
+
+---
+
+### 7.4. Update Tax Record
+- **Endpoint**: `PUT /api/taxes/:id`
+- **Access**: ADMIN only
+- **Headers**: `Authorization: Bearer <admin_token>`
+- **Request Body**: Accepts mutable fields (`name`, `computation_type`, `rate_percentage`, `is_active`).
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Tax \"GST 18%\" updated successfully.",
+    "tax": {
+      "id": "e6a7b8c9-...",
+      "name": "GST 18%",
+      "rate_percentage": 18.0,
+      "updated_at": "2026-10-31T13:05:00Z"
+    }
+  }
+  ```
+
+---
+
+### 7.5. Activate / Deactivate Tax Status
+- **Endpoint**: `PATCH /api/taxes/:id/status`
+- **Access**: ADMIN only
+- **Headers**: `Authorization: Bearer <admin_token>`
+- **Request Body**:
+  ```json
+  {
+    "is_active": false
+  }
+  ```
+- **Description**: Soft deactivates or reactivates the tax. Deactivating prevents new quotation/subscription assignment without breaking past invoices or active subscriptions.
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Tax \"GST 18%\" was deactivated successfully.",
+    "tax": {
+      "id": "e6a7b8c9-...",
+      "is_active": false
+    }
+  }
+  ```
+
+---
+
+### 7.6. Get Product Assigned Taxes
+- **Endpoint**: `GET /api/products/:productId/taxes`
+- **Access**: ADMIN, STAFF, and CUSTOMER
+- **Headers**: `Authorization: Bearer <token>`
+- **Description**: Returns all taxes currently associated with a specific product.
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "product_id": "a0eebc99-...",
+    "product_name": "Cloud Storage Pro",
+    "sales_price": 5000.0,
+    "taxes": [
+      {
+        "id": "e6a7b8c9-...",
+        "name": "GST 18%",
+        "computation_type": "percentage",
+        "rate_percentage": 18.0,
+        "is_active": true
+      }
+    ],
+    "count": 1
+  }
+  ```
+
+---
+
+### 7.7. Assign Taxes to Product
+- **Endpoint**: `PUT /api/products/:productId/taxes`
+- **Access**: ADMIN only
+- **Headers**: `Authorization: Bearer <admin_token>`
+- **Request Body**:
+  ```json
+  {
+    "tax_ids": [
+      "e6a7b8c9-...",
+      "b2c3d4e5-..."
+    ]
+  }
+  ```
+- **Validation**:
+  - Validates that the target product exists and is active.
+  - Validates that all supplied `tax_ids` exist, are distinct, and are active.
+  - Atomically replaces product-to-tax mappings in `public.product_taxes`.
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Assigned 2 taxes to product \"Cloud Storage Pro\" successfully.",
+    "product_id": "a0eebc99-...",
+    "assigned_count": 2,
+    "taxes": [...]
+  }
+  ```
+
+---
+
+### 7.8. Calculation Service Specifications (Contract for Members 2 & 3)
+
+Backend calculation engine available at: `backend/src/services/taxService.js`.
+
+#### Epsilon-Safe Rounding Rule:
+All currency operations MUST round to two decimal places using:
+$$\text{round}(v) = \frac{\lfloor (v + \epsilon) \times 100 + 0.5 \rfloor}{100}$$
+
+#### Exclusive Tax Mode (Default standard):
+In exclusive mode, line item sales price is the untaxed subtotal. Taxes are added on top:
+$$\text{Tax Amount (Percentage)} = \text{round}\left(\frac{\text{Base Subtotal} \times \text{Rate}}{100}\right)$$
+$$\text{Tax Amount (Fixed)} = \text{Fixed Fee} \times \text{Quantity}$$
+$$\text{Total Invoice Amount} = \text{Base Subtotal} + \sum \text{Tax Amounts}$$
+
+#### Snapshot Immutability Requirement:
+When Member 2 generates quotations and Member 3 generates finalized invoices, taxes MUST be snapshotted as static JSON objects on each line item (including `tax_id`, `tax_name`, `rate_percentage`, `computation_type`, `calculated_amount`). Future rate changes in `taxes` must never alter finalized invoice lines.
+
+---
+
+## 8. Discount Management & Promotional Calculation API (Phase 5)
+
+### 8.1. List Discounts
+- **Endpoint**: `GET /api/discounts`
+- **Access**: ADMIN, STAFF, and CUSTOMER
+- **Headers**: `Authorization: Bearer <token>`
+- **Query Parameters**:
+  - `page` (optional): Page number (default: 1)
+  - `limit` (optional): Items per page (default: 10, max: 100)
+  - `search` (optional): Discount code substring search
+  - `type` (optional): `percentage` or `fixed`
+  - `applies_to` (optional): `all`, `product`, `plan`
+  - `status` (optional): `active` or `inactive` (Customers receive active discounts only)
+  - `sortBy` (optional): `code`, `type`, `value`, `current_usage`, `created_at` (default: `created_at`)
+  - `sortOrder` (optional): `asc` or `desc` (default: `desc`)
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "discounts": [
+      {
+        "id": "7f8a9b0c-...",
+        "code": "SUMMER2026",
+        "type": "percentage",
+        "value": 15.0,
+        "display_value": "15%",
+        "min_quantity": 1,
+        "min_amount": 0.0,
+        "start_date": "2026-06-01",
+        "end_date": "2026-08-31",
+        "max_usage": 500,
+        "current_usage": 42,
+        "applies_to": "all",
+        "is_active": true,
+        "created_at": "2026-10-31T13:20:00Z"
+      }
+    ],
+    "pagination": {
+      "total": 1,
+      "page": 1,
+      "limit": 10,
+      "totalPages": 1
+    }
+  }
+  ```
+
+---
+
+### 8.2. Get Discount Details
+- **Endpoint**: `GET /api/discounts/:id`
+- **Access**: ADMIN and STAFF
+- **Headers**: `Authorization: Bearer <token>`
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "discount": {
+      "id": "7f8a9b0c-...",
+      "code": "SUMMER2026",
+      "type": "percentage",
+      "value": 15.0,
+      "display_value": "15%",
+      "min_quantity": 1,
+      "min_amount": 0.0,
+      "start_date": "2026-06-01",
+      "end_date": "2026-08-31",
+      "max_usage": 500,
+      "current_usage": 42,
+      "applies_to": "product",
+      "is_active": true,
+      "associated_products": [
+        {
+          "product_id": "a0eebc99-...",
+          "product_name": "Enterprise Cloud Storage",
+          "sales_price": 5000.0,
+          "is_active": true
+        }
+      ]
+    }
+  }
+  ```
+
+---
+
+### 8.3. Create Discount
+- **Endpoint**: `POST /api/discounts`
+- **Access**: ADMIN only
+- **Headers**: `Authorization: Bearer <admin_token>`
+- **Request Body**:
+  ```json
+  {
+    "code": "DIWALI500",
+    "type": "fixed",
+    "value": 500.00,
+    "min_quantity": 1,
+    "min_amount": 2000.00,
+    "start_date": "2026-11-01",
+    "end_date": "2026-11-15",
+    "max_usage": 1000,
+    "applies_to": "all",
+    "is_active": true
+  }
+  ```
+- **Validation**:
+  - `code`: Required, 2-50 alphanumeric characters (hyphen/underscore permitted), automatically normalized to uppercase, unique in DB.
+  - `type`: Required, `'percentage'` or `'fixed'`.
+  - `value`: Required positive number $> 0$. For percentage: $\le 100$. For fixed: represents Rupee amount in ₹.
+  - `min_quantity`: Integer $\ge 1$.
+  - `min_amount`: Numeric $\ge 0$.
+  - `start_date` / `end_date`: Optional valid dates (`end_date >= start_date`).
+  - `max_usage`: Optional positive integer $> 0$ (or null for unlimited).
+  - `applies_to`: `'all'`, `'product'`, or `'plan'`.
+  - `product_ids`: Optional array of product UUIDs when `applies_to = 'product'`.
+- **Success Response (201 Created)**:
+  ```json
+  {
+    "success": true,
+    "message": "Discount \"DIWALI500\" created successfully.",
+    "discount": {
+      "id": "7f8a9b0c-...",
+      "code": "DIWALI500",
+      "type": "fixed",
+      "value": 500.0
+    }
+  }
+  ```
+
+---
+
+### 8.4. Update Discount
+- **Endpoint**: `PUT /api/discounts/:id`
+- **Access**: ADMIN only
+- **Headers**: `Authorization: Bearer <admin_token>`
+- **Request Body**: Accepts mutable fields (`code`, `type`, `value`, `min_quantity`, `min_amount`, `start_date`, `end_date`, `max_usage`, `applies_to`, `target_id`, `product_ids`, `is_active`). Preserves system ID and historical `current_usage`.
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Discount \"DIWALI500\" updated successfully.",
+    "discount": { ... }
+  }
+  ```
+
+---
+
+### 8.5. Activate / Deactivate Discount
+- **Endpoint**: `PATCH /api/discounts/:id/status`
+- **Access**: ADMIN only
+- **Headers**: `Authorization: Bearer <admin_token>`
+- **Request Body**:
+  ```json
+  {
+    "is_active": false
+  }
+  ```
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Discount \"DIWALI500\" was deactivated successfully.",
+    "discount": {
+      "id": "7f8a9b0c-...",
+      "is_active": false
+    }
+  }
+  ```
+
+---
+
+### 8.6. Validate & Compute Discount Code
+- **Endpoint**: `POST /api/discounts/validate`
+- **Access**: Public / Authenticated (used during checkout, quotation generation, and cart review)
+- **Description**: Evaluates eligibility and computes discount deduction on the server without modifying the database usage counter.
+- **Request Body**:
+  ```json
+  {
+    "code": "FESTIVE15",
+    "totalAmount": 5000.00,
+    "totalQuantity": 2,
+    "items": [
+      {
+        "product_id": "a0eebc99-...",
+        "price": 2500.00,
+        "quantity": 2
+      }
+    ]
+  }
+  ```
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "isValid": true,
+    "message": "Discount \"FESTIVE15\" applied successfully!",
+    "originalAmount": 5000.00,
+    "eligibleAmount": 5000.00,
+    "discountAmount": 750.00,
+    "finalAmount": 4250.00,
+    "discount": {
+      "id": "7f8a9b0c-...",
+      "code": "FESTIVE15",
+      "type": "percentage",
+      "value": 15.0,
+      "display_value": "15%"
+    }
+  }
+  ```
+- **Error Response on Ineligibility / Expiry / Exhaustion (422 Unprocessable Entity)**:
+  ```json
+  {
+    "success": false,
+    "isValid": false,
+    "message": "Discount usage limit has been exhausted.",
+    "originalAmount": 5000.00,
+    "eligibleAmount": 0,
+    "discountAmount": 0,
+    "finalAmount": 5000.00
+  }
+  ```
+
+---
+
+### 8.7. Calculation & Usage Specifications (Contract for Members 2 & 3)
+
+The shared discount calculation and atomic usage engine is available at:
+`backend/src/services/discountService.js`.
+
+#### Calculation Rules:
+1. **Applicability Scope**:
+   - `all`: Applies to total transaction.
+   - `product`: Evaluates line items matching assigned product IDs in `discount_products` or `target_id`. Calculates deduction solely on eligible items.
+   - `plan`: Evaluates line items matching the `target_id` subscription plan.
+2. **Cap on Fixed Deductions**:
+   - Fixed discounts in ₹ are capped at the eligible subtotal:
+     $$\text{Discount Amount} = \min(\text{Eligible Amount}, \text{Fixed Value})$$
+     $$\text{Final Net Amount} = \max(0, \text{Original Amount} - \text{Discount Amount})$$
+   - Negative invoice balances are strictly prohibited.
+3. **Usage Increment Timing**:
+   - **Quotation Drafting**: Call `POST /api/discounts/validate` (or `calculateDiscount`). Usage counter is **NOT** incremented.
+   - **Order / Subscription Confirmation**: Call `applyDiscountUsage(discountId)` inside the final transaction confirmation.
+   - **Cancellation / Voided Quotes**: Do not touch usage if order was never confirmed.
+
+---
+
+## 9. Standard Error Format
 ```json
 {
   "success": false,

@@ -41,6 +41,10 @@ export const VariantList = () => {
   const [page, setPage] = useState(1);
   const limit = 15;
 
+  // Status toggle confirmation modal
+  const [confirmVariant, setConfirmVariant] = useState(null);
+  const [statusActionLoading, setStatusActionLoading] = useState(false);
+
   const isAdmin = role === 'ADMIN';
 
   const fetchAllVariants = useCallback(async () => {
@@ -93,6 +97,47 @@ export const VariantList = () => {
   const handleClearSearch = () => {
     setSearch('');
     setPage(1);
+  };
+
+  // Toggle Variant Status (Activate / Deactivate)
+  const handleToggleVariantStatus = async () => {
+    if (!confirmVariant || !session?.access_token) return;
+
+    try {
+      setStatusActionLoading(true);
+      const newStatus = confirmVariant.is_active === false ? true : false;
+
+      const res = await fetch(
+        `${API_BASE_URL}/products/${confirmVariant.product_id}/variants/${confirmVariant.id}/status`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({ is_active: newStatus })
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to update variant status.');
+      }
+
+      addToast(
+        data.message || `Variant "${confirmVariant.variant_name}" ${newStatus ? 'activated' : 'deactivated'} successfully.`,
+        'success'
+      );
+
+      setConfirmVariant(null);
+      fetchAllVariants();
+    } catch (err) {
+      console.error('Error updating variant status:', err);
+      addToast(err.message || 'Failed to update variant status.', 'error');
+    } finally {
+      setStatusActionLoading(false);
+    }
   };
 
   const formatCurrency = (amount) => {
@@ -374,15 +419,31 @@ export const VariantList = () => {
 
                       {/* Actions */}
                       <td style={{ textAlign: 'right' }}>
-                        <Link
-                          to={`/admin/products/${v.product_id}`}
-                          className="btn btn-ghost btn-sm"
-                          style={{ padding: '0.35rem 0.6rem', fontSize: '0.8rem', gap: '0.3rem' }}
-                          title="Manage in Product Details"
-                        >
-                          <span>Manage</span>
-                          <ExternalLink size={13} />
-                        </Link>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <Link
+                            to={`/admin/products/${v.product_id}`}
+                            className="btn btn-ghost btn-sm"
+                            style={{ padding: '0.35rem 0.6rem', fontSize: '0.8rem', gap: '0.3rem' }}
+                            title="Manage in Product Details"
+                          >
+                            <span>Manage</span>
+                            <ExternalLink size={13} />
+                          </Link>
+
+                          {isAdmin && (
+                            <button
+                              onClick={() => setConfirmVariant(v)}
+                              className="btn btn-ghost btn-sm"
+                              style={{
+                                padding: '0.35rem 0.5rem',
+                                color: v.is_active !== false ? '#DC2626' : '#166534'
+                              }}
+                              title={v.is_active !== false ? 'Deactivate Variant' : 'Activate Variant'}
+                            >
+                              {v.is_active !== false ? <Power size={14} /> : <RotateCcw size={14} />}
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -447,6 +508,94 @@ export const VariantList = () => {
           </div>
         )}
       </div>
+
+      {/* ============================================================================== */}
+      {/* MODAL: DEACTIVATE / REACTIVATE CONFIRMATION */}
+      {/* ============================================================================== */}
+      {confirmVariant && (
+        <div
+          className="modal-overlay"
+          onClick={() => !statusActionLoading && setConfirmVariant(null)}
+        >
+          <div
+            className="modal-box"
+            style={{ maxWidth: '480px' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <AlertCircle
+                  size={20}
+                  style={{ color: confirmVariant.is_active !== false ? '#DC2626' : '#166534' }}
+                />
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: 'var(--primary-navy)' }}>
+                  {confirmVariant.is_active !== false ? 'Deactivate Variant?' : 'Reactivate Variant?'}
+                </h3>
+              </div>
+              <button
+                className="modal-close"
+                onClick={() => !statusActionLoading && setConfirmVariant(null)}
+                disabled={statusActionLoading}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="modal-body" style={{ padding: '1.25rem 1.5rem' }}>
+              <p style={{ margin: '0 0 1rem', lineHeight: 1.5 }}>
+                Are you sure you want to {confirmVariant.is_active !== false ? 'deactivate' : 'activate'}{' '}
+                variant <strong>&quot;{confirmVariant.variant_name}&quot;</strong> for product{' '}
+                <strong>&quot;{confirmVariant.product_name}&quot;</strong>?
+              </p>
+
+              {confirmVariant.is_active !== false ? (
+                <div
+                  style={{
+                    backgroundColor: 'var(--bg-sand)',
+                    padding: '0.85rem',
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: '0.85rem',
+                    color: 'var(--text-secondary)',
+                    border: '1px solid var(--border-light)'
+                  }}
+                >
+                  <strong>Deactivation Impact:</strong> This variant will no longer be selectable for new customer quotations or subscription plans. Existing subscriptions will retain their contracted pricing and variant attributes.
+                </div>
+              ) : (
+                <div
+                  style={{
+                    backgroundColor: 'var(--bg-sand)',
+                    padding: '0.85rem',
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: '0.85rem',
+                    color: 'var(--text-secondary)',
+                    border: '1px solid var(--border-light)'
+                  }}
+                >
+                  <strong>Activation Impact:</strong> Activating this variant makes it immediately available for new customer quotations, orders, and subscriptions.
+                </div>
+              )}
+            </div>
+
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', padding: '1rem 1.5rem', borderTop: '1px solid var(--border-light)' }}>
+              <Button
+                variant="outline"
+                onClick={() => setConfirmVariant(null)}
+                disabled={statusActionLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant={confirmVariant.is_active !== false ? 'danger' : 'primary'}
+                loading={statusActionLoading}
+                onClick={handleToggleVariantStatus}
+              >
+                {confirmVariant.is_active !== false ? 'Confirm Deactivation' : 'Confirm Activation'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

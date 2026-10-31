@@ -22,7 +22,8 @@ import {
   Search,
   CheckCircle,
   Hash,
-  Calculator
+  Calculator,
+  Percent
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/common/Toast';
@@ -74,6 +75,15 @@ export const ProductDetail = () => {
   const [variantToggleLoading, setVariantToggleLoading] = useState(false);
 
   const isAdmin = role === 'ADMIN';
+
+  // Product taxes state
+  const [productTaxes, setProductTaxes] = useState([]);
+  const [loadingTaxes, setLoadingTaxes] = useState(false);
+  const [allTaxes, setAllTaxes] = useState([]);
+  const [showTaxModal, setShowTaxModal] = useState(false);
+  const [selectedTaxIds, setSelectedTaxIds] = useState([]);
+  const [savingTaxes, setSavingTaxes] = useState(false);
+  const [taxModalError, setTaxModalError] = useState('');
 
   // Fetch product information
   const fetchProduct = useCallback(async () => {
@@ -138,6 +148,94 @@ export const ProductDetail = () => {
   useEffect(() => {
     fetchProduct();
   }, [fetchProduct]);
+
+  // Fetch assigned taxes for this product
+  const fetchProductTaxes = useCallback(async () => {
+    if (!id || !session?.access_token) return;
+
+    try {
+      setLoadingTaxes(true);
+      const res = await fetch(`${API_BASE_URL}/products/${id}/taxes`, {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setProductTaxes(data.taxes || []);
+      }
+    } catch (err) {
+      console.error('Error fetching product taxes:', err);
+    } finally {
+      setLoadingTaxes(false);
+    }
+  }, [id, session?.access_token]);
+
+  // Fetch all active taxes for the assignment modal
+  const fetchAllActiveTaxes = useCallback(async () => {
+    if (!session?.access_token) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/taxes?status=active&limit=100`, {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAllTaxes(data.taxes || []);
+      }
+    } catch (err) {
+      console.error('Error fetching active taxes list:', err);
+    }
+  }, [session?.access_token]);
+
+  useEffect(() => {
+    fetchProductTaxes();
+  }, [fetchProductTaxes]);
+
+  const openTaxModal = () => {
+    setSelectedTaxIds((productTaxes || []).map((t) => t.id));
+    setTaxModalError('');
+    fetchAllActiveTaxes();
+    setShowTaxModal(true);
+  };
+
+  const handleToggleTaxSelection = (taxId) => {
+    setSelectedTaxIds((prev) =>
+      prev.includes(taxId) ? prev.filter((t) => t !== taxId) : [...prev, taxId]
+    );
+  };
+
+  const handleSaveProductTaxes = async (e) => {
+    e.preventDefault();
+    try {
+      setSavingTaxes(true);
+      setTaxModalError('');
+
+      const res = await fetch(`${API_BASE_URL}/products/${id}/taxes`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ tax_ids: selectedTaxIds })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to update product taxes.');
+      }
+
+      addToast(data.message || 'Product taxes updated successfully.', 'success');
+      setShowTaxModal(false);
+      fetchProductTaxes();
+    } catch (err) {
+      console.error('Error saving product taxes:', err);
+      setTaxModalError(err.message || 'Failed to save product taxes.');
+    } finally {
+      setSavingTaxes(false);
+    }
+  };
 
   useEffect(() => {
     if (product) {
@@ -996,6 +1094,206 @@ export const ProductDetail = () => {
       </div>
 
       {/* ============================================================================== */}
+      {/* SECTION: APPLIED TAXES & FISCAL RULES */}
+      {/* ============================================================================== */}
+      <div
+        style={{
+          backgroundColor: '#FFFFFF',
+          borderRadius: 'var(--radius-md)',
+          border: '1px solid var(--border-light)',
+          padding: '1.5rem',
+          marginBottom: '1.5rem'
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '1.25rem',
+            flexWrap: 'wrap',
+            gap: '1rem'
+          }}
+        >
+          <div>
+            <h3
+              style={{
+                fontSize: '1.15rem',
+                fontWeight: 600,
+                color: 'var(--primary-navy)',
+                margin: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <Percent size={20} />
+              <span>Applied Taxes & Fiscal Rules</span>
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  backgroundColor: 'var(--bg-sand)',
+                  color: 'var(--text-secondary)',
+                  padding: '0.15rem 0.55rem',
+                  borderRadius: '12px'
+                }}
+              >
+                {productTaxes.length} assigned
+              </span>
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0.25rem 0 0 0' }}>
+              Taxes applied automatically during subscription billing and quotation creation.
+            </p>
+          </div>
+
+          {isAdmin && product.is_active && (
+            <Button
+              variant="outline"
+              size="small"
+              icon={Percent}
+              onClick={openTaxModal}
+            >
+              Manage Taxes
+            </Button>
+          )}
+        </div>
+
+        {/* Taxes Content */}
+        {loadingTaxes ? (
+          <div style={{ padding: '2rem', textAlign: 'center' }}>
+            <LoadingSpinner size="medium" message="Loading assigned taxes..." />
+          </div>
+        ) : productTaxes.length === 0 ? (
+          <div
+            style={{
+              padding: '2rem 1.5rem',
+              textAlign: 'center',
+              backgroundColor: 'var(--bg-sand)',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px dashed var(--border-light)'
+            }}
+          >
+            <Percent size={24} style={{ color: 'var(--text-muted)', marginBottom: '0.5rem' }} />
+            <div style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--primary-navy)' }}>
+              No taxes currently assigned
+            </div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.825rem', margin: '0.25rem 0 1rem 0' }}>
+              This product is currently treated as tax-exempt or unconfigured.
+            </p>
+            {isAdmin && product.is_active && (
+              <Button variant="primary" size="small" icon={Plus} onClick={openTaxModal}>
+                Assign Taxes
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div>
+            <div style={{ overflowX: 'auto', marginBottom: '1.25rem' }}>
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Tax Name</th>
+                    <th>Type</th>
+                    <th>Rate / Amount</th>
+                    <th>Est. Tax on Base Price ({formatCurrency(numSales)})</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {productTaxes.map((t) => {
+                    const isPct = t.computation_type === 'percentage';
+                    const rate = Number(t.rate_percentage) || 0;
+                    const computedAmount = isPct
+                      ? Math.round(((numSales * rate) / 100 + Number.EPSILON) * 100) / 100
+                      : rate;
+
+                    return (
+                      <tr key={t.id}>
+                        <td style={{ fontWeight: 600, color: 'var(--primary-navy)' }}>
+                          <Link to={`/admin/taxes/${t.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                            {t.name}
+                          </Link>
+                        </td>
+                        <td>
+                          <span
+                            className="badge"
+                            style={{
+                              backgroundColor: isPct ? '#EFF6FF' : '#F0FDF4',
+                              color: isPct ? '#1D4ED8' : '#15803D',
+                              fontSize: '0.75rem',
+                              fontWeight: 600
+                            }}
+                          >
+                            {isPct ? 'Percentage' : 'Fixed Fee'}
+                          </span>
+                        </td>
+                        <td style={{ fontWeight: 600 }}>
+                          {isPct ? `${rate}%` : formatCurrency(rate)}
+                        </td>
+                        <td style={{ fontWeight: 600, color: '#166534' }}>
+                          +{formatCurrency(computedAmount)}
+                        </td>
+                        <td>
+                          <span className={`badge ${t.is_active !== false ? 'badge-active' : 'badge-inactive'}`}>
+                            {t.is_active !== false ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Total Tax Preview Summary Banner */}
+            {(() => {
+              const totalTaxEst = productTaxes.reduce((sum, t) => {
+                const isPct = t.computation_type === 'percentage';
+                const rate = Number(t.rate_percentage) || 0;
+                const amt = isPct
+                  ? Math.round(((numSales * rate) / 100 + Number.EPSILON) * 100) / 100
+                  : rate;
+                return sum + amt;
+              }, 0);
+              const roundedTotalTax = Math.round((totalTaxEst + Number.EPSILON) * 100) / 100;
+              const grandTotalWithTax = Math.round((numSales + roundedTotalTax + Number.EPSILON) * 100) / 100;
+
+              return (
+                <div
+                  style={{
+                    backgroundColor: 'var(--bg-sand)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '1rem 1.25rem',
+                    border: '1px solid var(--border-light)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '1rem'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    <Calculator size={16} style={{ color: 'var(--primary-navy)' }} />
+                    <span>Exclusive Tax Standard: Base Price ({formatCurrency(numSales)}) + Taxes ({formatCurrency(roundedTotalTax)})</span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                      Grand Total with Taxes:
+                    </span>
+                    <strong style={{ fontSize: '1.15rem', color: 'var(--primary-navy)' }}>
+                      {formatCurrency(grandTotalWithTax)}
+                    </strong>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+      </div>
+
+      {/* ============================================================================== */}
       {/* MODAL: ADD PRODUCT VARIANT */}
       {/* ============================================================================== */}
       {showAddVariantModal && (
@@ -1508,6 +1806,132 @@ export const ProductDetail = () => {
                 {product.is_active ? 'Confirm Archive' : 'Confirm Reactivation'}
               </Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================================== */}
+      {/* MODAL: ASSIGN / MANAGE PRODUCT TAXES */}
+      {/* ============================================================================== */}
+      {showTaxModal && (
+        <div className="modal-overlay" onClick={() => !savingTaxes && setShowTaxModal(false)}>
+          <div className="modal-box" style={{ maxWidth: '580px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-navy)' }}>
+                <Percent size={18} />
+                Manage Taxes for &quot;{product.name}&quot;
+              </h3>
+              <button
+                className="modal-close"
+                onClick={() => !savingTaxes && setShowTaxModal(false)}
+                disabled={savingTaxes}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProductTaxes}>
+              <div className="modal-body" style={{ padding: '1.25rem 1.5rem', maxHeight: '60vh', overflowY: 'auto' }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                  Select the active taxes that apply to this product. Multiple percentage and fixed monetary taxes may be assigned simultaneously.
+                </p>
+
+                {taxModalError && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <Alert type="error" message={taxModalError} onClose={() => setTaxModalError('')} />
+                  </div>
+                )}
+
+                {allTaxes.length === 0 ? (
+                  <div style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                    No active taxes found in the system.{' '}
+                    <Link to="/admin/taxes/new" style={{ color: 'var(--primary-navy)', fontWeight: 600 }}>
+                      Create a tax first
+                    </Link>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {allTaxes.map((t) => {
+                      const isChecked = selectedTaxIds.includes(t.id);
+                      const isPct = t.computation_type === 'percentage';
+                      const rate = Number(t.rate_percentage) || 0;
+
+                      return (
+                        <div
+                          key={t.id}
+                          onClick={() => handleToggleTaxSelection(t.id)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '0.85rem 1rem',
+                            borderRadius: 'var(--radius-sm)',
+                            border: isChecked ? '1.5px solid var(--primary-navy)' : '1px solid var(--border-light)',
+                            backgroundColor: isChecked ? 'var(--primary-navy-soft)' : '#FFFFFF',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => {}} // handled by parent click
+                              style={{ width: '16px', height: '16px', accentColor: 'var(--primary-navy)', cursor: 'pointer' }}
+                            />
+                            <div>
+                              <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--primary-navy)' }}>
+                                {t.name}
+                              </div>
+                              <small style={{ color: 'var(--text-muted)', fontSize: '0.775rem' }}>
+                                {isPct ? 'Percentage Tax' : 'Fixed Monetary Surcharge'}
+                              </small>
+                            </div>
+                          </div>
+
+                          <div style={{ fontWeight: 700, fontSize: '0.95rem', color: isPct ? 'var(--primary-navy)' : '#166534' }}>
+                            {isPct ? `${rate}%` : formatCurrency(rate)}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div
+                className="modal-footer"
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '1rem 1.5rem',
+                  borderTop: '1px solid var(--border-light)'
+                }}
+              >
+                <span style={{ fontSize: '0.825rem', color: 'var(--text-muted)' }}>
+                  {selectedTaxIds.length} tax{selectedTaxIds.length === 1 ? '' : 'es'} selected
+                </span>
+
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowTaxModal(false)}
+                    disabled={savingTaxes}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    loading={savingTaxes}
+                  >
+                    Save Assigned Taxes
+                  </Button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
       )}

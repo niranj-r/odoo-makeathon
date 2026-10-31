@@ -386,7 +386,7 @@ CREATE TRIGGER trigger_subscription_plans_updated_at
 CREATE TABLE IF NOT EXISTS public.taxes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
-    rate_percentage NUMERIC(5, 2) NOT NULL CHECK (rate_percentage >= 0),
+    rate_percentage NUMERIC(12, 2) NOT NULL CHECK (rate_percentage >= 0),
     computation_type TEXT NOT NULL DEFAULT 'percentage' CHECK (computation_type IN ('percentage', 'fixed')),
     is_active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
@@ -394,8 +394,42 @@ CREATE TABLE IF NOT EXISTS public.taxes (
 );
 
 ALTER TABLE public.taxes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public read active taxes" ON public.taxes;
 CREATE POLICY "Public read active taxes" ON public.taxes FOR SELECT USING (is_active = true);
+
+DROP POLICY IF EXISTS "Staff read taxes" ON public.taxes;
+CREATE POLICY "Staff read taxes" ON public.taxes FOR SELECT TO authenticated USING (public.is_staff_or_admin());
+
+DROP POLICY IF EXISTS "Admins manage taxes" ON public.taxes;
 CREATE POLICY "Admins manage taxes" ON public.taxes FOR ALL TO authenticated USING (public.is_admin());
+
+DROP TRIGGER IF EXISTS trigger_taxes_updated_at ON public.taxes;
+CREATE TRIGGER trigger_taxes_updated_at
+  BEFORE UPDATE ON public.taxes
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_updated_at();
+
+-- 8.4.1. PRODUCT TAXES (Many-to-Many Association)
+CREATE TABLE IF NOT EXISTS public.product_taxes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
+    tax_id UUID NOT NULL REFERENCES public.taxes(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+    UNIQUE(product_id, tax_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_product_taxes_product_id ON public.product_taxes(product_id);
+CREATE INDEX IF NOT EXISTS idx_product_taxes_tax_id ON public.product_taxes(tax_id);
+
+ALTER TABLE public.product_taxes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public read product taxes" ON public.product_taxes;
+CREATE POLICY "Public read product taxes" ON public.product_taxes FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Staff read product taxes" ON public.product_taxes;
+CREATE POLICY "Staff read product taxes" ON public.product_taxes FOR SELECT TO authenticated USING (public.is_staff_or_admin());
+
+DROP POLICY IF EXISTS "Admins manage product taxes" ON public.product_taxes;
+CREATE POLICY "Admins manage product taxes" ON public.product_taxes FOR ALL TO authenticated USING (public.is_admin());
 
 -- 8.5. DISCOUNTS
 CREATE TABLE IF NOT EXISTS public.discounts (
