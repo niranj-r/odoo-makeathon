@@ -9,6 +9,7 @@ import {
   RefreshCw,
   FileText,
   CreditCard,
+  UserCheck,
   LogOut,
   Building2
 } from 'lucide-react';
@@ -48,12 +49,8 @@ export const StaffLayout = () => {
               className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             >
               <LayoutDashboard size={18} />
-              <span>Dashboard</span>
+              <span>Workspace</span>
             </NavLink>
-
-            <div style={{ margin: '1rem 0 0.4rem 0.5rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              Commercial Operations
-            </div>
 
             <NavLink
               to="/staff/customers"
@@ -106,6 +103,18 @@ export const StaffLayout = () => {
               <CreditCard size={18} />
               <span>Payments</span>
             </NavLink>
+
+            <div style={{ margin: '1rem 0 0.4rem 0.5rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+              Account
+            </div>
+
+            <NavLink
+              to="/staff/profile"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <UserCheck size={18} />
+              <span>My Profile</span>
+            </NavLink>
           </nav>
 
           <div className="sidebar-footer">
@@ -125,12 +134,12 @@ export const StaffLayout = () => {
           <header className="app-topbar">
             <div>
               <span className="badge badge-staff">
-                <Briefcase size={12} /> Brightloop Staff
+                <Briefcase size={12} /> Staff Portal
               </span>
             </div>
 
             <div className="topbar-user">
-              <div className="user-avatar" style={{ backgroundColor: 'var(--secondary-sand-dark)' }}>
+              <div className="user-avatar">
                 {displayName.charAt(0).toUpperCase()}
               </div>
               <div className="user-meta">

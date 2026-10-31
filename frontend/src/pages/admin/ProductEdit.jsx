@@ -20,7 +20,8 @@ import {
   ExternalLink,
   Calculator,
   Hash,
-  Eye
+  Eye,
+  Percent
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/common/Toast';
@@ -74,6 +75,11 @@ export const ProductEdit = () => {
   const [variantToggleLoading, setVariantToggleLoading] = useState(false);
 
   const isAdmin = role === 'ADMIN';
+
+  // Taxes state
+  const [allTaxes, setAllTaxes] = useState([]);
+  const [selectedTaxIds, setSelectedTaxIds] = useState([]);
+  const [loadingTaxes, setLoadingTaxes] = useState(false);
 
   // Real-time calculation
   const numSales = parseFloat(salesPrice) || 0;
@@ -145,10 +151,49 @@ export const ProductEdit = () => {
     }
   }, [id, session?.access_token]);
 
+  // Load available active taxes and assigned product taxes
+  const fetchTaxesData = useCallback(async () => {
+    if (!id || !session?.access_token) return;
+    try {
+      setLoadingTaxes(true);
+      const [resAssigned, resAll] = await Promise.all([
+        fetch(`${API_BASE_URL}/products/${id}/taxes`, {
+          headers: { Authorization: `Bearer ${session.access_token}` }
+        }),
+        fetch(`${API_BASE_URL}/taxes?status=active&limit=100`, {
+          headers: { Authorization: `Bearer ${session.access_token}` }
+        })
+      ]);
+
+      const [dataAssigned, dataAll] = await Promise.all([
+        resAssigned.json(),
+        resAll.json()
+      ]);
+
+      if (resAll.ok) {
+        setAllTaxes(dataAll.taxes || []);
+      }
+      if (resAssigned.ok) {
+        setSelectedTaxIds((dataAssigned.taxes || []).map((t) => t.id));
+      }
+    } catch (err) {
+      console.error('Error fetching taxes for edit:', err);
+    } finally {
+      setLoadingTaxes(false);
+    }
+  }, [id, session?.access_token]);
+
   useEffect(() => {
     fetchProduct();
     fetchVariants();
-  }, [fetchProduct, fetchVariants]);
+    fetchTaxesData();
+  }, [fetchProduct, fetchVariants, fetchTaxesData]);
+
+  const handleToggleTaxSelection = (taxId) => {
+    setSelectedTaxIds((prev) =>
+      prev.includes(taxId) ? prev.filter((t) => t !== taxId) : [...prev, taxId]
+    );
+  };
 
   // Format currency (Indian Rupees)
   const formatCurrency = (amount) => {
@@ -225,6 +270,16 @@ export const ProductEdit = () => {
       if (!res.ok) {
         throw new Error(data.message || 'Failed to update product.');
       }
+
+      // Sync assigned product taxes
+      await fetch(`${API_BASE_URL}/products/${id}/taxes`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token}`
+        },
+        body: JSON.stringify({ tax_ids: selectedTaxIds })
+      });
 
       addToast(`Product "${name.trim()}" updated successfully.`, 'success');
       navigate(`/admin/products/${id}`);
@@ -713,6 +768,108 @@ export const ProductEdit = () => {
                 onChange={(e) => setNotes(e.target.value)}
               />
             </div>
+          </div>
+
+          {/* Section: Applicable Taxes */}
+          <div
+            style={{
+              marginBottom: '2rem',
+              padding: '1.25rem',
+              backgroundColor: '#F8FAFC',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid #E2E8F0'
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '0.75rem',
+                flexWrap: 'wrap',
+                gap: '0.5rem'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Percent size={18} style={{ color: 'var(--primary-navy)' }} />
+                <label className="form-label" style={{ margin: 0, fontWeight: 600 }}>
+                  Applicable Fiscal Taxes ({selectedTaxIds.length} selected)
+                </label>
+              </div>
+
+              <Link
+                to="/admin/taxes"
+                target="_blank"
+                style={{ fontSize: '0.8rem', color: 'var(--primary-navy)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+              >
+                <span>Tax Directory</span>
+                <ExternalLink size={12} />
+              </Link>
+            </div>
+
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.825rem', marginBottom: '1rem' }}>
+              Select which active taxes apply to this product during subscription billing.
+            </p>
+
+            {loadingTaxes ? (
+              <div style={{ padding: '1rem', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                Loading available taxes...
+              </div>
+            ) : allTaxes.length === 0 ? (
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                No active taxes configured.{' '}
+                <Link to="/admin/taxes/new" style={{ color: 'var(--primary-navy)' }}>
+                  Create a tax
+                </Link>
+              </div>
+            ) : (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+                  gap: '0.65rem'
+                }}
+              >
+                {allTaxes.map((t) => {
+                  const isChecked = selectedTaxIds.includes(t.id);
+                  const isPct = t.computation_type === 'percentage';
+                  const rate = Number(t.rate_percentage) || 0;
+
+                  return (
+                    <div
+                      key={t.id}
+                      onClick={() => handleToggleTaxSelection(t.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0.65rem 0.85rem',
+                        borderRadius: 'var(--radius-sm)',
+                        border: isChecked ? '1.5px solid var(--primary-navy)' : '1px solid var(--border-light)',
+                        backgroundColor: isChecked ? 'var(--primary-navy-soft)' : '#FFFFFF',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => {}}
+                          style={{ width: '15px', height: '15px', accentColor: 'var(--primary-navy)', cursor: 'pointer' }}
+                        />
+                        <span style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--primary-navy)' }}>
+                          {t.name}
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '0.825rem', fontWeight: 600, color: isPct ? 'var(--primary-navy)' : '#166534' }}>
+                        {isPct ? `${rate}%` : formatCurrency(rate)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Actions */}
