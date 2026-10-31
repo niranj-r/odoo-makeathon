@@ -2,6 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import healthRoutes from './routes/healthRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import productRoutes from './routes/productRoutes.js';
+import subscriptionPlanRoutes from './routes/subscriptionPlanRoutes.js';
+import { verifyAuth } from './middleware/auth.js';
+import { requireRoles } from './middleware/roles.js';
+import { listAllVariants } from './controllers/variantController.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -25,7 +30,10 @@ app.get('/', (req, res) => {
     endpoints: {
       health: '/api/health',
       me: '/api/auth/me',
-      staff: '/api/users/staff'
+      staff: '/api/users/staff',
+      products: '/api/products',
+      variants: '/api/variants',
+      subscriptionPlans: '/api/subscription-plans'
     }
   });
 });
@@ -33,6 +41,9 @@ app.get('/', (req, res) => {
 // API Routes
 app.use('/api', healthRoutes);
 app.use('/api', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/subscription-plans', subscriptionPlanRoutes);
+app.get('/api/variants', verifyAuth, requireRoles(['ADMIN', 'STAFF']), listAllVariants);
 
 // 404 Handler
 app.use((req, res) => {

@@ -153,6 +153,16 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
+  -- Prevent users from changing their email directly on profiles (email is managed via auth.users)
+  IF (NEW.email IS DISTINCT FROM OLD.email) THEN
+    IF NOT (
+      public.is_admin() OR 
+      (current_setting('request.jwt.claims', true)::jsonb ->> 'role') = 'service_role'
+    ) THEN
+      RAISE EXCEPTION 'Unauthorized: Email cannot be modified directly on profiles table.';
+    END IF;
+  END IF;
+
   -- If role or status is being changed
   IF (NEW.role IS DISTINCT FROM OLD.role) OR (NEW.status IS DISTINCT FROM OLD.status) THEN
     -- Allow change only if caller is an admin or service_role
@@ -263,6 +273,14 @@ BEGIN
 END;
 $$;
 
+-- Security hardening: Revoke execute from PUBLIC, anon, and authenticated
+-- Only service_role or database administrators can invoke admin promotion
+REVOKE EXECUTE ON FUNCTION public.promote_user_to_admin(TEXT) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.promote_user_to_admin(TEXT) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.promote_user_to_admin(TEXT) FROM authenticated;
+GRANT EXECUTE ON FUNCTION public.promote_user_to_admin(TEXT) TO service_role;
+GRANT EXECUTE ON FUNCTION public.promote_user_to_admin(TEXT) TO postgres;
+
 -- ==============================================================================
 -- 8. MEMBER 1 BUSINESS MODULE TABLES (Pre-configured Foundation)
 -- ==============================================================================
@@ -281,8 +299,20 @@ CREATE TABLE IF NOT EXISTS public.products (
 );
 
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public read active products" ON public.products;
 CREATE POLICY "Public read active products" ON public.products FOR SELECT USING (is_active = true);
+
+DROP POLICY IF EXISTS "Staff read products" ON public.products;
+CREATE POLICY "Staff read products" ON public.products FOR SELECT TO authenticated USING (public.is_staff_or_admin());
+
+DROP POLICY IF EXISTS "Admins manage products" ON public.products;
 CREATE POLICY "Admins manage products" ON public.products FOR ALL TO authenticated USING (public.is_admin());
+
+DROP TRIGGER IF EXISTS trigger_products_updated_at ON public.products;
+CREATE TRIGGER trigger_products_updated_at
+  BEFORE UPDATE ON public.products
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_updated_at();
 
 -- 8.2. PRODUCT VARIANTS
 CREATE TABLE IF NOT EXISTS public.product_variants (
@@ -291,15 +321,31 @@ CREATE TABLE IF NOT EXISTS public.product_variants (
     variant_name TEXT NOT NULL,
     attribute_name TEXT NOT NULL,
     attribute_value TEXT NOT NULL,
-    price_extra NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
+    price_extra NUMERIC(12, 2) NOT NULL DEFAULT 0.00 CHECK (price_extra >= 0),
     sku TEXT UNIQUE,
+    is_active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
+-- Ensure is_active column exists if table was created previously without it
+ALTER TABLE public.product_variants ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true;
+
 ALTER TABLE public.product_variants ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public read product variants" ON public.product_variants;
 CREATE POLICY "Public read product variants" ON public.product_variants FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Staff read product variants" ON public.product_variants;
+CREATE POLICY "Staff read product variants" ON public.product_variants FOR SELECT TO authenticated USING (public.is_staff_or_admin());
+
+DROP POLICY IF EXISTS "Admins manage product variants" ON public.product_variants;
 CREATE POLICY "Admins manage product variants" ON public.product_variants FOR ALL TO authenticated USING (public.is_admin());
+
+DROP TRIGGER IF EXISTS trigger_variants_updated_at ON public.product_variants;
+CREATE TRIGGER trigger_variants_updated_at
+  BEFORE UPDATE ON public.product_variants
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_updated_at();
 
 -- 8.3. SUBSCRIPTION PLANS
 CREATE TABLE IF NOT EXISTS public.subscription_plans (
@@ -321,8 +367,20 @@ CREATE TABLE IF NOT EXISTS public.subscription_plans (
 );
 
 ALTER TABLE public.subscription_plans ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public read active plans" ON public.subscription_plans;
 CREATE POLICY "Public read active plans" ON public.subscription_plans FOR SELECT USING (is_active = true);
+
+DROP POLICY IF EXISTS "Staff read subscription plans" ON public.subscription_plans;
+CREATE POLICY "Staff read subscription plans" ON public.subscription_plans FOR SELECT TO authenticated USING (public.is_staff_or_admin());
+
+DROP POLICY IF EXISTS "Admins manage subscription plans" ON public.subscription_plans;
 CREATE POLICY "Admins manage subscription plans" ON public.subscription_plans FOR ALL TO authenticated USING (public.is_admin());
+
+DROP TRIGGER IF EXISTS trigger_subscription_plans_updated_at ON public.subscription_plans;
+CREATE TRIGGER trigger_subscription_plans_updated_at
+  BEFORE UPDATE ON public.subscription_plans
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_updated_at();
 
 -- 8.4. TAXES
 CREATE TABLE IF NOT EXISTS public.taxes (

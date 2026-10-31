@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Package,
   Layers,
+  CalendarRange,
   Percent,
   Users,
   LogOut,
@@ -49,28 +50,53 @@ export const AdminLayout = () => {
               <span>Dashboard</span>
             </NavLink>
 
-            <div style={{ margin: '1rem 0 0.4rem 0.5rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              Member 1 Modules
-            </div>
-
-            <div className="nav-item" style={{ opacity: 0.65, cursor: 'default' }} title="Foundation phase: Auth & Users active">
-              <Package size={18} />
-              <span>Products & Variants</span>
-            </div>
-
-            <div className="nav-item" style={{ opacity: 0.65, cursor: 'default' }} title="Foundation phase: Auth & Users active">
-              <Layers size={18} />
-              <span>Subscription Plans</span>
-            </div>
-
-            <div className="nav-item" style={{ opacity: 0.65, cursor: 'default' }} title="Foundation phase: Auth & Users active">
-              <Percent size={18} />
-              <span>Taxes & Discounts</span>
-            </div>
-
-            <div className="nav-item" style={{ opacity: 0.65, cursor: 'default' }} title="Staff & User Management">
+            <NavLink
+              to="/admin/users"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
               <Users size={18} />
               <span>User Management</span>
+            </NavLink>
+
+            <NavLink
+              to="/admin/staff"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <Building2 size={18} />
+              <span>Staff Management</span>
+            </NavLink>
+
+            <NavLink
+              to="/admin/products"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <Package size={18} />
+              <span>Product Management</span>
+            </NavLink>
+
+            <NavLink
+              to="/admin/variants"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <Layers size={18} />
+              <span>Product Variants</span>
+            </NavLink>
+
+            <NavLink
+              to="/admin/subscription-plans"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <CalendarRange size={18} />
+              <span>Subscription Plans</span>
+            </NavLink>
+
+            <div style={{ margin: '1rem 0 0.4rem 0.5rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+              Future Modules
+            </div>
+
+            <div className="nav-item" style={{ opacity: 0.65, cursor: 'default' }} title="Phase 2 Stage 5 Domain">
+              <Percent size={18} />
+              <span>Taxes & Discounts</span>
             </div>
           </nav>
 

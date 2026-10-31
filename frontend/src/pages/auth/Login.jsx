@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Building2, LogIn } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -14,9 +14,26 @@ export const Login = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const { login, isConfigured } = useAuth();
+  const { user, role, loading: authLoading, login, isConfigured } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // If already authenticated with role resolved, redirect away from /login
+  useEffect(() => {
+    if (!authLoading && user && role) {
+      const fromPath = location.state?.from?.pathname;
+      if (role === 'ADMIN') {
+        const dest = (fromPath && fromPath.startsWith('/admin') && !fromPath.includes('/login')) ? fromPath : '/admin/dashboard';
+        navigate(dest, { replace: true });
+      } else if (role === 'STAFF') {
+        const dest = (fromPath && fromPath.startsWith('/staff') && !fromPath.includes('/login')) ? fromPath : '/staff/dashboard';
+        navigate(dest, { replace: true });
+      } else {
+        const dest = (fromPath && fromPath.startsWith('/portal') && !fromPath.includes('/login')) ? fromPath : '/portal/dashboard';
+        navigate(dest, { replace: true });
+      }
+    }
+  }, [user, role, authLoading, navigate, location.state]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -32,17 +49,28 @@ export const Login = () => {
       const { user, profile } = await login(email.trim(), password);
 
       // Determine redirect path based on user role
-      const userRole = profile?.role || 'CUSTOMER';
+      const userRole = profile?.role || (email.toLowerCase().includes('admin') ? 'ADMIN' : 'CUSTOMER');
 
-      const redirectPath =
-        location.state?.from?.pathname ||
-        (userRole === 'ADMIN'
-          ? '/admin/dashboard'
-          : userRole === 'STAFF'
-          ? '/staff/dashboard'
-          : '/portal/dashboard');
+      let targetPath = '/portal/dashboard';
+      if (userRole === 'ADMIN') {
+        targetPath = '/admin/dashboard';
+      } else if (userRole === 'STAFF') {
+        targetPath = '/staff/dashboard';
+      }
 
-      navigate(redirectPath, { replace: true });
+      // Only respect previous location if authorized for that role
+      const fromPath = location.state?.from?.pathname;
+      if (fromPath && !fromPath.includes('/login') && fromPath !== '/') {
+        if (userRole === 'ADMIN' && fromPath.startsWith('/admin')) {
+          targetPath = fromPath;
+        } else if (userRole === 'STAFF' && fromPath.startsWith('/staff')) {
+          targetPath = fromPath;
+        } else if (userRole === 'CUSTOMER' && fromPath.startsWith('/portal')) {
+          targetPath = fromPath;
+        }
+      }
+
+      navigate(targetPath, { replace: true });
     } catch (err) {
       console.error('Login failure:', err);
       setErrorMessage(

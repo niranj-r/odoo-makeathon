@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   ShieldAlert,
   Users,
@@ -9,7 +10,9 @@ import {
   CheckCircle,
   AlertCircle,
   Lock,
-  LogOut
+  LogOut,
+  ArrowRight,
+  Briefcase
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import InputField from '../../components/forms/InputField';
@@ -165,10 +168,12 @@ export const AdminDashboard = () => {
         <div className="stat-card">
           <div className="stat-header">
             <span className="stat-title">Staff Management</span>
-            <Users size={20} color="var(--primary-navy)" />
+            <Briefcase size={20} color="var(--primary-navy)" />
           </div>
           <div className="stat-value">Active</div>
-          <p style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>Admin-only staff creation active</p>
+          <Link to="/admin/staff" style={{ marginTop: '0.5rem', fontSize: '0.825rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontWeight: 600 }}>
+            Manage Staff Directory <ArrowRight size={13} />
+          </Link>
         </div>
       </div>
 
@@ -242,9 +247,14 @@ export const AdminDashboard = () => {
               <h3>Role-Based Access Control (RBAC)</h3>
               <p style={{ fontSize: '0.825rem' }}>Live profile directory and assigned privilege levels.</p>
             </div>
-            <button onClick={fetchUsers} className="btn btn-outline btn-sm">
-              Refresh
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <Link to="/admin/users" className="btn btn-outline btn-sm">
+                View All Users
+              </Link>
+              <button onClick={fetchUsers} className="btn btn-outline btn-sm">
+                Refresh
+              </button>
+            </div>
           </div>
 
           <div className="data-table-wrapper">
