@@ -695,3 +695,5 @@ export const updateProductStatus = async (req, res, next) => {
   }
 };
 
+
+export const getProducts = listProducts;

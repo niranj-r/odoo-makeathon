@@ -815,3 +815,5 @@ export const listAllVariants = async (req, res, next) => {
   }
 };
 
+
+export const getVariantsByProductId = listVariants;

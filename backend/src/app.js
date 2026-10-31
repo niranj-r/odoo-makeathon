@@ -1,14 +1,11 @@
 import express from 'express';
 import cors from 'cors';
-import helmet from 'helmet';
-import morgan from 'morgan';
 import dotenv from 'dotenv';
 
 import healthRoutes from './routes/healthRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import subscriptionPlanRoutes from './routes/subscriptionPlanRoutes.js';
-<<<<<<< HEAD
 import discountRoutes from './routes/discountRoutes.js';
 import taxRoutes from './routes/taxRoutes.js';
 import adminStaffRoutes from './routes/adminStaffRoutes.js';
@@ -26,16 +23,6 @@ import dashboardRoutes from './routes/dashboardRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import portalRoutes from './routes/portalRoutes.js';
-=======
-import taxRoutes from './routes/taxRoutes.js';
-import discountRoutes from './routes/discountRoutes.js';
-import dashboardRoutes from './routes/dashboardRoutes.js';
-import adminStaffRoutes from './routes/adminStaffRoutes.js';
-import staffPortalRoutes from './routes/staffPortalRoutes.js';
-import { verifyAuth } from './middleware/auth.js';
-import { requireRoles } from './middleware/roles.js';
-import { listAllVariants } from './controllers/variantController.js';
->>>>>>> origin/master
 import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
@@ -43,12 +30,8 @@ dotenv.config();
 const app = express();
 
 // Security and utility middleware
-app.use(helmet({
-  crossOriginResourcePolicy: false
-}));
 app.use(cors());
 app.use(express.json());
-app.use(morgan('dev'));
 
 // API Documentation / Health Root
 app.get('/', (req, res) => {
@@ -58,7 +41,6 @@ app.get('/', (req, res) => {
     status: 'online',
     documentation: {
       health: '/api/health',
-<<<<<<< HEAD
       auth: '/api/auth',
       products: '/api/products',
       subscriptionPlans: '/api/subscription-plans',
@@ -79,20 +61,10 @@ app.get('/', (req, res) => {
       analytics: '/api/analytics',
       reports: '/api/reports',
       portal: '/api/portal'
-=======
-      me: '/api/auth/me',
-      staff: '/api/users/staff',
-      products: '/api/products',
-      variants: '/api/variants',
-      subscriptionPlans: '/api/subscription-plans',
-      taxes: '/api/taxes',
-      discounts: '/api/discounts'
->>>>>>> origin/master
     }
   });
 });
 
-<<<<<<< HEAD
 // Health Checks
 app.use('/api/health', healthRoutes);
 
@@ -123,19 +95,6 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/portal', portalRoutes);
-=======
-// API Routes
-app.use('/api', healthRoutes);
-app.use('/api', authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/subscription-plans', subscriptionPlanRoutes);
-app.use('/api/taxes', taxRoutes);
-app.use('/api/discounts', discountRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/admin/staff', adminStaffRoutes);
-app.use('/api/staff', staffPortalRoutes);
-app.get('/api/variants', verifyAuth, requireRoles(['ADMIN', 'STAFF']), listAllVariants);
->>>>>>> origin/master
 
 // 404 Handler
 app.use((req, res) => {
