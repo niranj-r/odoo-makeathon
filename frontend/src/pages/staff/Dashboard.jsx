@@ -1,17 +1,23 @@
 import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Briefcase,
   Users,
   FileSpreadsheet,
   Receipt,
-  ShieldAlert,
+  Plus,
+  RefreshCw,
+  Copy,
   LogOut,
-  Info
+  Info,
+  ArrowRight
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import Button from '../../components/common/Button';
 
 export const StaffDashboard = () => {
   const { user, profile, logout } = useAuth();
+  const navigate = useNavigate();
 
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Staff Member';
 
@@ -28,53 +34,73 @@ export const StaffDashboard = () => {
           </div>
           <h1>Welcome, {displayName}</h1>
           <p>
-            Logged in as <strong>{user?.email}</strong> with role <strong>STAFF</strong>. You have access to customer support and day-to-day operations.
+            Logged in as <strong>{user?.email}</strong> with role <strong>STAFF</strong>. You have operational access to customer onboarding, quoting, and subscription management.
           </p>
         </div>
 
-        <button onClick={logout} className="btn btn-secondary btn-sm" style={{ alignSelf: 'flex-start' }}>
-          <LogOut size={16} /> Sign Out
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem', alignSelf: 'flex-start' }}>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={Plus}
+            onClick={() => navigate('/staff/quotations/new')}
+          >
+            New Quotation
+          </Button>
+          <button onClick={logout} className="btn btn-outline btn-sm" style={{ color: '#FFFFFF', borderColor: 'rgba(255,255,255,0.4)' }}>
+            <LogOut size={16} /> Sign Out
+          </button>
+        </div>
       </div>
 
       {/* Access Control Notice */}
       <div className="alert alert-info">
         <Info size={20} style={{ flexShrink: 0 }} />
         <div>
-          <strong>Role-Based Access Control Notice:</strong> As a Staff member, you have operational permissions to manage customer quotes and subscriptions. Staff accounts are strictly forbidden from modifying system-wide products, tax configurations, and creating new staff users.
+          <strong>Role-Based Access Control Notice:</strong> As a Staff member, you have operational permissions to manage customer quotes, templates, and subscriptions. Staff accounts are strictly forbidden from modifying system-wide products, tax configurations, and creating new staff users.
         </div>
       </div>
 
-      {/* Operational Highlights */}
+      {/* Operational Highlights / Modules */}
       <div className="stats-grid">
-        <div className="stat-card">
+        <Link to="/staff/customers" className="stat-card" style={{ textDecoration: 'none' }}>
           <div className="stat-header">
-            <span className="stat-title">Customer Subscriptions</span>
-            <FileSpreadsheet size={20} color="var(--primary-navy)" />
-          </div>
-          <div className="stat-value">Operational</div>
-          <p style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>Member 2: Lifecycle management module</p>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-header">
-            <span className="stat-title">Customer Accounts</span>
+            <span className="stat-title">Customer Directory</span>
             <Users size={20} color="var(--primary-navy)" />
           </div>
-          <div className="stat-value">Verified</div>
-          <p style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>View permitted customer directory profiles</p>
-        </div>
+          <div className="stat-value" style={{ fontSize: '1.4rem' }}>Customers</div>
+          <p style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>View, onboard, and manage customer accounts &rarr;</p>
+        </Link>
 
-        <div className="stat-card">
+        <Link to="/staff/quotations" className="stat-card" style={{ textDecoration: 'none' }}>
           <div className="stat-header">
-            <span className="stat-title">Invoicing & Billing</span>
-            <Receipt size={20} color="var(--primary-navy)" />
+            <span className="stat-title">Commercial Proposals</span>
+            <FileSpreadsheet size={20} color="var(--primary-navy)" />
           </div>
-          <div className="stat-value">Automated</div>
-          <p style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>Member 3: Automated billing module</p>
-        </div>
+          <div className="stat-value" style={{ fontSize: '1.4rem' }}>Quotations</div>
+          <p style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>Draft, send, and convert accepted proposals &rarr;</p>
+        </Link>
+
+        <Link to="/staff/subscriptions" className="stat-card" style={{ textDecoration: 'none' }}>
+          <div className="stat-header">
+            <span className="stat-title">Recurring Contracts</span>
+            <RefreshCw size={20} color="var(--primary-navy)" />
+          </div>
+          <div className="stat-value" style={{ fontSize: '1.4rem' }}>Subscriptions</div>
+          <p style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>Activate, pause, renew, and close contracts &rarr;</p>
+        </Link>
+
+        <Link to="/staff/templates" className="stat-card" style={{ textDecoration: 'none' }}>
+          <div className="stat-header">
+            <span className="stat-title">Reusable Presets</span>
+            <Copy size={20} color="var(--primary-navy)" />
+          </div>
+          <div className="stat-value" style={{ fontSize: '1.4rem' }}>Templates</div>
+          <p style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>Standardized terms, presets, and lines &rarr;</p>
+        </Link>
       </div>
 
+      {/* Account Info Card */}
       <div className="content-card">
         <div className="card-title-row">
           <div>
@@ -97,8 +123,8 @@ export const StaffDashboard = () => {
             <div><span className="badge badge-staff">STAFF</span></div>
           </div>
           <div>
-            <small style={{ color: 'var(--text-muted)', display: 'block' }}>ADMIN ACCESS</small>
-            <strong style={{ color: '#DC2626' }}>Restricted (Forbidden)</strong>
+            <small style={{ color: 'var(--text-muted)', display: 'block' }}>STATUS</small>
+            <div><span className="badge badge-active">ACTIVE</span></div>
           </div>
         </div>
       </div>
@@ -107,4 +133,3 @@ export const StaffDashboard = () => {
 };
 
 export default StaffDashboard;
-

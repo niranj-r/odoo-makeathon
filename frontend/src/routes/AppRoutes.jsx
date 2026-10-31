@@ -19,6 +19,22 @@ import AdminDashboard from '../pages/admin/Dashboard';
 import StaffDashboard from '../pages/staff/Dashboard';
 import CustomerDashboard from '../pages/customer/Dashboard';
 
+// Member 2 Feature Pages: Customer Management
+import CustomerList from '../pages/staff/customers/CustomerList';
+import CustomerDetail from '../pages/staff/customers/CustomerDetail';
+
+// Member 2 Feature Pages: Quotation Templates
+import TemplateList from '../pages/staff/templates/TemplateList';
+
+// Member 2 Feature Pages: Quotation Management
+import QuotationList from '../pages/staff/quotations/QuotationList';
+import QuotationBuilder from '../pages/staff/quotations/QuotationBuilder';
+import QuotationDetail from '../pages/staff/quotations/QuotationDetail';
+
+// Member 2 Feature Pages: Subscription Management
+import SubscriptionList from '../pages/staff/subscriptions/SubscriptionList';
+import SubscriptionDetail from '../pages/staff/subscriptions/SubscriptionDetail';
+
 // Helper component for root '/' navigation
 const RootRedirect = () => {
   const { user, role, loading } = useAuth();
@@ -78,7 +94,7 @@ export const AppRoutes = () => {
         <Route path="dashboard" element={<AdminDashboard />} />
       </Route>
 
-      {/* Protected Staff Routes */}
+      {/* Protected Staff Routes (Commercial Engine - Member 2) */}
       <Route
         path="/staff"
         element={
@@ -89,6 +105,22 @@ export const AppRoutes = () => {
       >
         <Route index element={<Navigate to="/staff/dashboard" replace />} />
         <Route path="dashboard" element={<StaffDashboard />} />
+
+        {/* Customer Management */}
+        <Route path="customers" element={<CustomerList />} />
+        <Route path="customers/:id" element={<CustomerDetail />} />
+
+        {/* Quotation Templates */}
+        <Route path="templates" element={<TemplateList />} />
+
+        {/* Quotations */}
+        <Route path="quotations" element={<QuotationList />} />
+        <Route path="quotations/new" element={<QuotationBuilder />} />
+        <Route path="quotations/:id" element={<QuotationDetail />} />
+
+        {/* Subscriptions */}
+        <Route path="subscriptions" element={<SubscriptionList />} />
+        <Route path="subscriptions/:id" element={<SubscriptionDetail />} />
       </Route>
 
       {/* Protected Customer Routes */}
@@ -102,6 +134,10 @@ export const AppRoutes = () => {
       >
         <Route index element={<Navigate to="/portal/dashboard" replace />} />
         <Route path="dashboard" element={<CustomerDashboard />} />
+        <Route path="quotations" element={<QuotationList />} />
+        <Route path="quotations/:id" element={<QuotationDetail />} />
+        <Route path="subscriptions" element={<SubscriptionList />} />
+        <Route path="subscriptions/:id" element={<SubscriptionDetail />} />
       </Route>
 
       {/* Catch-all 404 */}
@@ -111,4 +147,3 @@ export const AppRoutes = () => {
 };
 
 export default AppRoutes;
-

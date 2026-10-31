@@ -5,6 +5,8 @@ import {
   LayoutDashboard,
   FileSpreadsheet,
   Users,
+  Copy,
+  RefreshCw,
   LogOut,
   Building2
 } from 'lucide-react';
@@ -51,15 +53,37 @@ export const StaffLayout = () => {
               Operations
             </div>
 
-            <div className="nav-item" style={{ opacity: 0.65, cursor: 'default' }} title="Member 2 Module">
-              <FileSpreadsheet size={18} />
-              <span>Quotes & Subscriptions</span>
-            </div>
-
-            <div className="nav-item" style={{ opacity: 0.65, cursor: 'default' }} title="Customer Directory">
+            <NavLink
+              to="/staff/customers"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
               <Users size={18} />
-              <span>Customers Directory</span>
-            </div>
+              <span>Customers</span>
+            </NavLink>
+
+            <NavLink
+              to="/staff/templates"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <Copy size={18} />
+              <span>Quotation Templates</span>
+            </NavLink>
+
+            <NavLink
+              to="/staff/quotations"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <FileSpreadsheet size={18} />
+              <span>Quotations</span>
+            </NavLink>
+
+            <NavLink
+              to="/staff/subscriptions"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <RefreshCw size={18} />
+              <span>Subscriptions</span>
+            </NavLink>
           </nav>
 
           <div className="sidebar-footer">
@@ -106,4 +130,3 @@ export const StaffLayout = () => {
 };
 
 export default StaffLayout;
-
