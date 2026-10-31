@@ -1,7 +1,3 @@
--- ==============================================================================
--- BRIGHTLOOP PHASE 5: DISCOUNT MANAGEMENT & APPLICABILITY MAPPING
--- Propose/Review before execution in Supabase Dashboard -> SQL Editor
--- ==============================================================================
 
 -- 1. Ensure UUID Extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
