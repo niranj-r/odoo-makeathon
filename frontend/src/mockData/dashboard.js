@@ -1,0 +1,111 @@
+export const mockDashboardData = {
+  kpis: {
+    mrr: {
+      current: 128450,
+      trend: { value: 14.2, direction: 'up', label: 'vs last month' },
+    },
+    arr: {
+      current: 1541400,
+      trend: { value: 18.7, direction: 'up', label: 'annualized run rate' },
+    },
+    netRevenue: {
+      current: 142300,
+      target: 150000,
+      trend: { value: 9.4, direction: 'up', label: '94.8% of monthly target' },
+    },
+    activeSubscriptions: {
+      total: 1482,
+      trend: { value: 8.3, direction: 'up', label: '+114 net this month' },
+      breakdown: { active: 1290, trialing: 112, pastDue: 48, paused: 32 },
+    },
+    churnRate: {
+      percentage: 1.6,
+      trend: { value: 0.4, direction: 'down', label: 'churn decreased by 0.4%' },
+    },
+    arpu: {
+      current: 86.67,
+      trend: { value: 5.2, direction: 'up', label: '+$4.28 per account' },
+    },
+    ltv: {
+      current: 5417,
+      trend: { value: 7.1, direction: 'up', label: 'projected customer value' },
+    },
+  },
+  revenueSparkline: [
+    { date: 'Day 1', amount: 112000 },
+    { date: 'Day 5', amount: 114500 },
+    { date: 'Day 10', amount: 118200 },
+    { date: 'Day 15', amount: 121400 },
+    { date: 'Day 20', amount: 124800 },
+    { date: 'Day 25', amount: 126900 },
+    { date: 'Day 30', amount: 128450 },
+  ],
+  statusDistribution: [
+    { status: 'active', label: 'Active', count: 1290, percentage: 87.0, color: '#10b981' },
+    { status: 'quotation', label: 'Trial / Quote', count: 112, percentage: 7.6, color: '#3b82f6' },
+    { status: 'paused', label: 'Past Due', count: 48, percentage: 3.2, color: '#f59e0b' },
+    { status: 'closed', label: 'Paused / Closed', count: 32, percentage: 2.2, color: '#94a3b8' },
+  ],
+  topPlans: [
+    {
+      planId: 'plan_enterprise',
+      name: 'Enterprise Global',
+      subscribersCount: 214,
+      mrrContribution: 61656,
+      sharePercentage: 48.0,
+      growthPercentage: 16.4,
+    },
+    {
+      planId: 'plan_pro',
+      name: 'Professional Growth',
+      subscribersCount: 636,
+      mrrContribution: 48824,
+      sharePercentage: 38.0,
+      growthPercentage: 11.2,
+    },
+    {
+      planId: 'plan_starter',
+      name: 'Starter Tier',
+      subscribersCount: 632,
+      mrrContribution: 17970,
+      sharePercentage: 14.0,
+      growthPercentage: 4.8,
+    },
+  ],
+  recentActivities: [
+    {
+      id: 'act_101',
+      type: 'payment_received',
+      title: 'Payment Received',
+      description: 'Auto-debit successful for Monthly Subscription (INV-2026-0104)',
+      customerName: 'Acme Technologies',
+      customerEmail: 'billing@acmetech.io',
+      amount: 759.0,
+      timestamp: '2026-10-31T08:14:00Z',
+      status: 'success',
+    },
+    {
+      id: 'act_102',
+      type: 'subscription_upgraded',
+      title: 'Plan Upgraded to Enterprise',
+      description: 'Expanded seat count from 15 to 50 with Odoo brand variant',
+      customerName: 'Nordic Logistics AS',
+      customerEmail: 'finance@nordiclog.no',
+      amount: 1159.0,
+      timestamp: '2026-10-31T06:45:00Z',
+      status: 'info',
+    },
+    {
+      id: 'act_103',
+      type: 'subscription_created',
+      title: 'New Subscription Activated',
+      description: 'Quotation QT-8891 accepted and converted to Active',
+      customerName: 'CloudScale Systems',
+      customerEmail: 'ops@cloudscale.net',
+      amount: 199.0,
+      timestamp: '2026-10-30T19:20:00Z',
+      status: 'success',
+    },
+  ],
+};
+

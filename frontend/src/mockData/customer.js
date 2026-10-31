@@ -1,0 +1,51 @@
+export const mockCustomerProfile = {
+  id: 'cust_acme',
+  name: 'Acme Technologies Inc.',
+  email: 'billing@acme.example.com',
+  company: 'Acme Technologies Inc.',
+  website: 'https://acme.example.com',
+  phone: '+1 (555) 234-5678',
+  taxId: 'US-EIN-987654321',
+  currency: 'USD',
+  billingAddress: {
+    line1: '100 Market Street',
+    line2: 'Suite 400',
+    city: 'San Francisco',
+    state: 'CA',
+    postalCode: '94105',
+    country: 'United States',
+  },
+  contacts: {
+    primary: {
+      name: 'Sarah Connor',
+      role: 'Chief Technology Officer',
+      email: 's.connor@acme.example.com',
+    },
+    billing: {
+      name: 'Michael Scott',
+      role: 'Finance Director',
+      email: 'billing@acme.example.com',
+    },
+  },
+  currentPlan: {
+    planId: 'plan_growth_yearly',
+    planName: 'Professional Growth',
+    interval: 'yearly',
+    amount: 948,
+    status: 'active',
+    renewalDate: '2027-01-14',
+    seatsIncluded: 15,
+    seatsUsed: 12,
+    apiUsageQuota: 250000,
+    apiUsageCurrent: 184200,
+    storageQuotaGb: 50,
+    storageUsedGb: 28.4,
+  },
+  preferences: {
+    emailReceipts: true,
+    upcomingRenewalReminderDays: 14,
+    autoPayEnabled: true,
+    currencyDisplay: 'USD',
+  },
+};
+

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Building2, Send, CheckCircle, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import InputField from '../../components/forms/InputField';
+import InputField from '../../components/common/InputField';
 import Button from '../../components/common/Button';
 import Alert from '../../components/common/Alert';
 import SetupBanner from '../../components/common/SetupBanner';

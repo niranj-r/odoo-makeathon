@@ -12,8 +12,8 @@ import {
   LogOut
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import InputField from '../../components/forms/InputField';
-import PasswordField, { validatePasswordCriteria } from '../../components/forms/PasswordField';
+import InputField from '../../components/common/InputField';
+import PasswordField, { validatePasswordCriteria } from '../../components/common/PasswordField';
 import Button from '../../components/common/Button';
 import Alert from '../../components/common/Alert';
 

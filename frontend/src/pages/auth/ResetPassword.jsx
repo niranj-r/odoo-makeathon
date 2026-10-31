@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Building2, KeyRound, CheckCircle, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import PasswordField, { validatePasswordCriteria } from '../../components/forms/PasswordField';
+import PasswordField, { validatePasswordCriteria } from '../../components/common/PasswordField';
 import Button from '../../components/common/Button';
 import Alert from '../../components/common/Alert';
 import SetupBanner from '../../components/common/SetupBanner';
