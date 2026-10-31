@@ -6,6 +6,7 @@ import customerRoutes from './routes/customerRoutes.js';
 import templateRoutes from './routes/templateRoutes.js';
 import quotationRoutes from './routes/quotationRoutes.js';
 import subscriptionRoutes from './routes/subscriptionRoutes.js';
+import jobRoutes from './routes/jobRoutes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -33,7 +34,8 @@ app.get('/', (req, res) => {
       customers: '/api/customers',
       quotationTemplates: '/api/quotation-templates',
       quotations: '/api/quotations',
-      subscriptions: '/api/subscriptions'
+      subscriptions: '/api/subscriptions',
+      adminJobs: '/api/admin/jobs'
     }
   });
 });
@@ -45,6 +47,7 @@ app.use('/api', customerRoutes);
 app.use('/api', templateRoutes);
 app.use('/api', quotationRoutes);
 app.use('/api', subscriptionRoutes);
+app.use('/api', jobRoutes);
 
 // 404 Handler
 app.use((req, res) => {

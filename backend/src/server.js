@@ -1,5 +1,6 @@
 import app from './app.js';
 import dotenv from 'dotenv';
+import { startExpiryWorker } from './jobs/expiryWorker.js';
 
 dotenv.config();
 
@@ -11,5 +12,9 @@ app.listen(PORT, () => {
   console.log(` URL: http://localhost:${PORT}`);
   console.log(` Health Check: http://localhost:${PORT}/api/health`);
   console.log(`=================================================`);
-});
 
+  // Start automated background expiry worker unless explicitly disabled
+  if (process.env.EXPIRY_WORKER_ENABLED !== 'false') {
+    startExpiryWorker();
+  }
+});
