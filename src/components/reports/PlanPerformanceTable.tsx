@@ -1,0 +1,127 @@
+"use client";
+
+import React, { useState } from "react";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { ExportButton } from "@/components/common/ExportButton";
+import { PlanPerformanceRow } from "@/types/reports";
+import { formatCurrency } from "@/utils/formatters";
+import { Search, Layers } from "lucide-react";
+import { EmptyState } from "@/components/common/EmptyState";
+
+interface PlanPerformanceTableProps {
+  data: PlanPerformanceRow[];
+}
+
+export function PlanPerformanceTable({ data }: PlanPerformanceTableProps) {
+  const [search, setSearch] = useState("");
+
+  const filteredData = data.filter((row) =>
+    row.planName.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const csvColumns = [
+    { header: "Plan Name", accessorKey: "planName" as const },
+    { header: "Billing Interval", accessorKey: "billingInterval" as const },
+    { header: "Price ($)", accessorKey: "price" as const },
+    { header: "Active Subscriptions", accessorKey: "activeSubscriptions" as const },
+    { header: "New Subs (MTD)", accessorKey: "newSubscriptionsMonth" as const },
+    { header: "Churned Subs (MTD)", accessorKey: "churnedSubscriptionsMonth" as const },
+    { header: "Monthly Recurring Revenue ($)", accessorKey: "mrr" as const },
+    { header: "Churn Rate (%)", accessorKey: "churnRate" as const },
+    { header: "Avg Tenure (Months)", accessorKey: "avgTenureMonths" as const },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+          <Input
+            placeholder="Search plan name..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 h-9 text-xs"
+          />
+        </div>
+        <ExportButton
+          filename="plan_performance_report"
+          columns={csvColumns}
+          data={filteredData}
+          label="Download Plans CSV"
+        />
+      </div>
+
+      <div className="rounded-xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Plan</TableHead>
+              <TableHead>Billing Cycle</TableHead>
+              <TableHead className="text-right">Price</TableHead>
+              <TableHead className="text-right">Active Subs</TableHead>
+              <TableHead className="text-right text-emerald-700">New</TableHead>
+              <TableHead className="text-right text-rose-600">Churned</TableHead>
+              <TableHead className="text-right font-bold text-slate-900">MRR</TableHead>
+              <TableHead className="text-right">Churn %</TableHead>
+              <TableHead className="text-right">Avg Tenure</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredData.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={9} className="p-0">
+                  <EmptyState
+                    title="No plans found"
+                    description="No plans match your search query."
+                    icon={Layers}
+                  />
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredData.map((row) => (
+                <TableRow key={row.planId}>
+                  <TableCell className="font-semibold text-slate-900">
+                    {row.planName}
+                  </TableCell>
+                  <TableCell className="capitalize text-slate-600 text-xs">
+                    {row.billingInterval}
+                  </TableCell>
+                  <TableCell className="text-right font-mono">
+                    {formatCurrency(row.price)}
+                  </TableCell>
+                  <TableCell className="text-right font-mono font-medium text-slate-800">
+                    {row.activeSubscriptions}
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-emerald-600 font-medium">
+                    +{row.newSubscriptionsMonth}
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-rose-600 font-medium">
+                    -{row.churnedSubscriptionsMonth}
+                  </TableCell>
+                  <TableCell className="text-right font-mono font-bold text-slate-900 bg-slate-50/50">
+                    {formatCurrency(row.mrr)}
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-slate-700">
+                    {row.churnRate}%
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-slate-600">
+                    {row.avgTenureMonths} mo
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
+

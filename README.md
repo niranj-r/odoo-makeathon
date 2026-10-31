@@ -481,7 +481,7 @@ VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_KEY
 | **Chris Thomas Abraham** | x | [ChrisToms14](https://github.com/ChrisToms14) | [Chris Thomas Abraham](https://www.linkedin.com/in/christhomasabraham/) |
 | **Niranj R** | x | [Niranj R](https://github.com/niranj-r) | [Niranj R](https://www.linkedin.com/in/niranj-r/) |
 | **Sradhya Renish** | x | [Sradhya9](https://github.com/sradhya9) | [Sradhya Renish](https://www.linkedin.com/in/sradhya-renish/) |
-| **Vedha Mahadevan** | x | [Vedha17Mahadevan](https://github.com/Vedha17Mahadevan) | [Vedha Mahadevan](https://www.linkedin.com/in/vedha-mahadevan/) |
+| **Vedha Mahadevan** | Member 4: Admin Dashboard, Analytics, Reports, Customer Portal & Universal CSV Export | [Vedha17Mahadevan](https://github.com/Vedha17Mahadevan) | [Vedha Mahadevan](https://www.linkedin.com/in/vedha-mahadevan/) |
 
 ---
 
