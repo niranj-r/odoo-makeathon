@@ -6,7 +6,7 @@ import {
   CreditCard,
   FileText,
   History,
-  User,
+  User
 } from 'lucide-react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import SetupBanner from '../components/common/SetupBanner';

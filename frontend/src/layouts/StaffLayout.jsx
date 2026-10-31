@@ -5,6 +5,10 @@ import {
   LayoutDashboard,
   FileSpreadsheet,
   Users,
+  Copy,
+  RefreshCw,
+  FileText,
+  CreditCard,
   LogOut,
   Building2
 } from 'lucide-react';
@@ -48,18 +52,60 @@ export const StaffLayout = () => {
             </NavLink>
 
             <div style={{ margin: '1rem 0 0.4rem 0.5rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              Operations
+              Commercial Operations
             </div>
 
-            <div className="nav-item" style={{ opacity: 0.65, cursor: 'default' }} title="Member 2 Module">
-              <FileSpreadsheet size={18} />
-              <span>Quotes & Subscriptions</span>
-            </div>
-
-            <div className="nav-item" style={{ opacity: 0.65, cursor: 'default' }} title="Customer Directory">
+            <NavLink
+              to="/staff/customers"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
               <Users size={18} />
-              <span>Customers Directory</span>
+              <span>Customers</span>
+            </NavLink>
+
+            <NavLink
+              to="/staff/templates"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <Copy size={18} />
+              <span>Quotation Templates</span>
+            </NavLink>
+
+            <NavLink
+              to="/staff/quotations"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <FileSpreadsheet size={18} />
+              <span>Quotations</span>
+            </NavLink>
+
+            <NavLink
+              to="/staff/subscriptions"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <RefreshCw size={18} />
+              <span>Subscriptions</span>
+            </NavLink>
+
+            <div style={{ margin: '1rem 0 0.4rem 0.5rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+              Financial Engine
             </div>
+
+            <NavLink
+              to="/staff/invoices"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <FileText size={18} />
+              <span>Invoices & Billing</span>
+            </NavLink>
+
+            <NavLink
+              to="/staff/payments"
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <CreditCard size={18} />
+              <span>Payments</span>
+            </NavLink>
           </nav>
 
           <div className="sidebar-footer">
@@ -106,4 +152,3 @@ export const StaffLayout = () => {
 };
 
 export default StaffLayout;
-

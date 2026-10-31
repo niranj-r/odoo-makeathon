@@ -928,3 +928,122 @@ small { font-size: 0.8125rem; }
   }
 }
 
+
+
+/* Member 3 Financial Badges & Action Toolbar Styles */
+.badge-paid {
+  background-color: #DEF7EC;
+  color: #03543F;
+}
+
+.badge-confirmed {
+  background-color: #E1EFFE;
+  color: #1E429F;
+}
+
+.badge-draft {
+  background-color: #F3F4F6;
+  color: #374151;
+}
+
+.badge-partial {
+  background-color: #FEF3C7;
+  color: #92400E;
+}
+
+.badge-unpaid {
+  background-color: #FEE2E2;
+  color: #991B1B;
+}
+
+.badge-cancelled {
+  background-color: #E5E7EB;
+  color: #6B7280;
+}
+
+.metric-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.metric-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.metric-card .metric-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.metric-card .metric-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+}
+
+.metric-card.accent {
+  border-left: 4px solid var(--primary-navy);
+}
+
+.metric-card.success {
+  border-left: 4px solid #0D9488;
+}
+
+.metric-card.warning {
+  border-left: 4px solid #D97706;
+}
+
+.metric-card.danger {
+  border-left: 4px solid #DC2626;
+}
+
+.invoice-preview-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.financial-summary-table {
+  width: 100%;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.financial-summary-table td {
+  padding: 0.4rem 0.5rem;
+}
+
+@media print {
+  .app-sidebar,
+  .app-header,
+  .action-bar,
+  .btn,
+  .setup-banner {
+    display: none !important;
+  }
+  .app-layout {
+    display: block !important;
+  }
+  .page-container {
+    padding: 0 !important;
+  }
+  .invoice-preview-card {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+}
