@@ -2,6 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import healthRoutes from './routes/healthRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import customerRoutes from './routes/customerRoutes.js';
+import templateRoutes from './routes/templateRoutes.js';
+import quotationRoutes from './routes/quotationRoutes.js';
+import subscriptionRoutes from './routes/subscriptionRoutes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -25,7 +29,11 @@ app.get('/', (req, res) => {
     endpoints: {
       health: '/api/health',
       me: '/api/auth/me',
-      staff: '/api/users/staff'
+      staff: '/api/users/staff',
+      customers: '/api/customers',
+      quotationTemplates: '/api/quotation-templates',
+      quotations: '/api/quotations',
+      subscriptions: '/api/subscriptions'
     }
   });
 });
@@ -33,6 +41,10 @@ app.get('/', (req, res) => {
 // API Routes
 app.use('/api', healthRoutes);
 app.use('/api', authRoutes);
+app.use('/api', customerRoutes);
+app.use('/api', templateRoutes);
+app.use('/api', quotationRoutes);
+app.use('/api', subscriptionRoutes);
 
 // 404 Handler
 app.use((req, res) => {
@@ -46,4 +58,3 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 export default app;
-
